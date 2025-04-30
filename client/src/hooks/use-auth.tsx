@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Registration failed",
+        title: "회원가입 실패",
         description: error.message,
         variant: "destructive",
       });
@@ -85,13 +85,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
+        title: "로그아웃",
+        description: "성공적으로 로그아웃 되었습니다.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Logout failed",
+        title: "로그아웃 실패",
         description: error.message,
         variant: "destructive",
       });

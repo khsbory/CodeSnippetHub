@@ -88,6 +88,7 @@ export default function AuthPage() {
     loginMutation.mutate({
       email: values.email,
       password: values.password,
+      username: values.email.split('@')[0] // 임시로 username 설정
     });
   };
 
@@ -233,11 +234,11 @@ export default function AuthPage() {
                       <div className="grid grid-cols-2 gap-4 mt-6">
                         <Button variant="outline" type="button">
                           <Github className="mr-2 h-4 w-4" />
-                          Github
+                          깃허브
                         </Button>
                         <Button variant="outline" type="button">
                           <Twitter className="mr-2 h-4 w-4" />
-                          Twitter
+                          트위터
                         </Button>
                       </div>
                     </CardContent>
@@ -433,11 +434,11 @@ export default function AuthPage() {
                       <div className="grid grid-cols-2 gap-4 mt-6">
                         <Button variant="outline" type="button">
                           <Github className="mr-2 h-4 w-4" />
-                          Github
+                          깃허브
                         </Button>
                         <Button variant="outline" type="button">
                           <Twitter className="mr-2 h-4 w-4" />
-                          Twitter
+                          트위터
                         </Button>
                       </div>
                     </CardContent>
