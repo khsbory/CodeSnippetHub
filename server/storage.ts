@@ -19,6 +19,9 @@ import {
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
+import { eq, and, or, desc, asc, like, sql } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import { db, pool } from "./db";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -57,7 +60,7 @@ export interface IStorage {
   deleteBookmark(id: number): Promise<boolean>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using any to avoid type issues with SessionStore
 }
 
 export class MemStorage implements IStorage {
@@ -67,7 +70,7 @@ export class MemStorage implements IStorage {
   private likes: Map<number, Like>;
   private bookmarks: Map<number, Bookmark>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any; // Using any to match interface
   
   userCurrentId: number;
   snippetCurrentId: number;
@@ -347,4 +350,323 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database storage implementation
+export class DatabaseStorage implements IStorage {
+  sessionStore: any; // Using any temporarily to fix type error
+  
+  constructor() {
+    const PostgresSessionStore = connectPg(session);
+    
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
+  }
+  
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+  
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+  
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username)}&background=random`;
+    const [user] = await db
+      .insert(users)
+      .values({ ...insertUser, avatar, createdAt: new Date() })
+      .returning();
+    return user;
+  }
+  
+  // Snippet methods
+  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all'): Promise<SnippetWithUser[]> {
+    let query = db.select({
+      snippet: snippets,
+      user: users
+    })
+    .from(snippets)
+    .innerJoin(users, eq(snippets.userId, users.id));
+    
+    // Filter by language if specified
+    if (language !== 'all') {
+      query = query.where(eq(snippets.language, language));
+    }
+    
+    // Apply sorting based on filter
+    if (filter === 'popular') {
+      query = query.orderBy(desc(snippets.views));
+    } else if (filter === 'trending') {
+      // This is simplified for now
+      query = query.orderBy(desc(snippets.views), desc(snippets.createdAt));
+    } else {
+      // Default to 'latest'
+      query = query.orderBy(desc(snippets.createdAt));
+    }
+    
+    // Limit results
+    query = query.limit(limit);
+    
+    const results = await query;
+    
+    // Transform results to SnippetWithUser format
+    return results.map((result: any) => ({
+      ...result.snippet,
+      user: result.user
+    }));
+  }
+  
+  async getSnippetById(id: number): Promise<SnippetWithUser | undefined> {
+    const [result] = await db.select({
+      snippet: snippets,
+      user: users
+    })
+    .from(snippets)
+    .innerJoin(users, eq(snippets.userId, users.id))
+    .where(eq(snippets.id, id));
+    
+    if (!result) return undefined;
+    
+    return {
+      ...result.snippet,
+      user: result.user
+    };
+  }
+  
+  async getSnippetsByUserId(userId: number): Promise<SnippetWithUser[]> {
+    const results = await db.select({
+      snippet: snippets,
+      user: users
+    })
+    .from(snippets)
+    .innerJoin(users, eq(snippets.userId, users.id))
+    .where(eq(snippets.userId, userId))
+    .orderBy(desc(snippets.createdAt));
+    
+    return results.map((result: any) => ({
+      ...result.snippet,
+      user: result.user
+    }));
+  }
+  
+  async createSnippet(insertSnippet: InsertSnippet): Promise<Snippet> {
+    const [snippet] = await db
+      .insert(snippets)
+      .values({ 
+        ...insertSnippet, 
+        createdAt: new Date(),
+        views: 0,
+        description: insertSnippet.description || null // Ensure description is not undefined
+      })
+      .returning();
+    
+    return snippet;
+  }
+  
+  async updateSnippet(id: number, updates: Partial<InsertSnippet>): Promise<Snippet | undefined> {
+    // Ensure description is not undefined if it's in the update
+    const updatesWithNullDesc = updates.description === undefined 
+      ? updates 
+      : { ...updates, description: updates.description || null };
+      
+    const [updatedSnippet] = await db
+      .update(snippets)
+      .set(updatesWithNullDesc)
+      .where(eq(snippets.id, id))
+      .returning();
+    
+    return updatedSnippet;
+  }
+  
+  async deleteSnippet(id: number): Promise<boolean> {
+    // Delete associated records first
+    await db.delete(comments).where(eq(comments.snippetId, id));
+    await db.delete(likes).where(eq(likes.snippetId, id));
+    await db.delete(bookmarks).where(eq(bookmarks.snippetId, id));
+    
+    const [deleted] = await db
+      .delete(snippets)
+      .where(eq(snippets.id, id))
+      .returning();
+    
+    return !!deleted;
+  }
+  
+  async incrementSnippetViews(id: number): Promise<boolean> {
+    const [updated] = await db
+      .update(snippets)
+      .set({ 
+        views: sql`${snippets.views} + 1` 
+      })
+      .where(eq(snippets.id, id))
+      .returning();
+    
+    return !!updated;
+  }
+  
+  async searchSnippets(query: string): Promise<SnippetWithUser[]> {
+    const searchPattern = `%${query}%`;
+    
+    const results = await db.select({
+      snippet: snippets,
+      user: users
+    })
+    .from(snippets)
+    .innerJoin(users, eq(snippets.userId, users.id))
+    .where(
+      or(
+        like(snippets.title, searchPattern),
+        like(snippets.description, searchPattern),
+        like(snippets.code, searchPattern),
+        like(snippets.language, searchPattern)
+      )
+    )
+    .orderBy(desc(snippets.createdAt));
+    
+    return results.map((result: any) => ({
+      ...result.snippet,
+      user: result.user
+    }));
+  }
+  
+  // Comment methods
+  async getCommentsBySnippetId(snippetId: number): Promise<CommentWithUser[]> {
+    const results = await db.select({
+      comment: comments,
+      user: users
+    })
+    .from(comments)
+    .innerJoin(users, eq(comments.userId, users.id))
+    .where(eq(comments.snippetId, snippetId))
+    .orderBy(asc(comments.createdAt));
+    
+    return results.map((result: any) => ({
+      ...result.comment,
+      user: result.user
+    }));
+  }
+  
+  async createComment(insertComment: InsertComment): Promise<Comment> {
+    const [comment] = await db
+      .insert(comments)
+      .values({
+        ...insertComment,
+        createdAt: new Date()
+      })
+      .returning();
+    
+    return comment;
+  }
+  
+  async deleteComment(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(comments)
+      .where(eq(comments.id, id))
+      .returning();
+    
+    return !!deleted;
+  }
+  
+  // Like methods
+  async getLikesBySnippetId(snippetId: number): Promise<Like[]> {
+    return db
+      .select()
+      .from(likes)
+      .where(eq(likes.snippetId, snippetId));
+  }
+  
+  async getLikeByUserAndSnippet(userId: number, snippetId: number): Promise<Like | undefined> {
+    const [like] = await db
+      .select()
+      .from(likes)
+      .where(
+        and(
+          eq(likes.userId, userId),
+          eq(likes.snippetId, snippetId)
+        )
+      );
+    
+    return like;
+  }
+  
+  async createLike(insertLike: InsertLike): Promise<Like> {
+    const [like] = await db
+      .insert(likes)
+      .values({
+        ...insertLike,
+        createdAt: new Date()
+      })
+      .returning();
+    
+    return like;
+  }
+  
+  async deleteLike(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(likes)
+      .where(eq(likes.id, id))
+      .returning();
+    
+    return !!deleted;
+  }
+  
+  // Bookmark methods
+  async getBookmarksByUserId(userId: number): Promise<SnippetWithUser[]> {
+    const results = await db.select({
+      snippet: snippets,
+      user: users,
+      bookmark: bookmarks
+    })
+    .from(bookmarks)
+    .innerJoin(snippets, eq(bookmarks.snippetId, snippets.id))
+    .innerJoin(users, eq(snippets.userId, users.id))
+    .where(eq(bookmarks.userId, userId));
+    
+    return results.map((result: any) => ({
+      ...result.snippet,
+      user: result.user
+    }));
+  }
+  
+  async getBookmarkByUserAndSnippet(userId: number, snippetId: number): Promise<Bookmark | undefined> {
+    const [bookmark] = await db
+      .select()
+      .from(bookmarks)
+      .where(
+        and(
+          eq(bookmarks.userId, userId),
+          eq(bookmarks.snippetId, snippetId)
+        )
+      );
+    
+    return bookmark;
+  }
+  
+  async createBookmark(insertBookmark: InsertBookmark): Promise<Bookmark> {
+    const [bookmark] = await db
+      .insert(bookmarks)
+      .values({
+        ...insertBookmark,
+        createdAt: new Date()
+      })
+      .returning();
+    
+    return bookmark;
+  }
+  
+  async deleteBookmark(id: number): Promise<boolean> {
+    const [deleted] = await db
+      .delete(bookmarks)
+      .where(eq(bookmarks.id, id))
+      .returning();
+    
+    return !!deleted;
+  }
+}
+
+// Use database storage instead of memory storage
+export const storage = new DatabaseStorage();
