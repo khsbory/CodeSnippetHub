@@ -252,16 +252,44 @@ export default function AuthPage() {
                 
                 {/* Register Tab */}
                 <TabsContent value="register">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Create an account</CardTitle>
-                      <CardDescription>
-                        Join our community to share and discover code snippets
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Form {...registerForm}>
-                        <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  {verificationSent ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>이메일 인증이 필요합니다</CardTitle>
+                        <CardDescription>
+                          등록하신 이메일로 인증 링크를 발송했습니다
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <Alert className="bg-amber-50 border-amber-200">
+                          <AlertCircle className="h-4 w-4 text-amber-600" />
+                          <AlertDescription className="text-amber-700">
+                            계정 활성화를 위해 이메일을 확인하고 인증 링크를 클릭해주세요.
+                          </AlertDescription>
+                        </Alert>
+                        <p className="text-sm text-muted-foreground">
+                          이메일이 도착하지 않았나요? 스팸 폴더를 확인하거나 잠시 후 다시 시도해주세요.
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => setVerificationSent(false)}
+                        >
+                          다른 이메일로 가입하기
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>새 계정 만들기</CardTitle>
+                        <CardDescription>
+                          코드 스니펫을 공유하고 탐색할 수 있는 커뮤니티에 가입하세요
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Form {...registerForm}>
+                          <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
                           <FormField
                             control={registerForm.control}
                             name="username"
