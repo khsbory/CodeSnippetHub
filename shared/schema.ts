@@ -1,0 +1,88 @@
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  avatar: text("avatar"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
+export const snippets = pgTable("snippets", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  code: text("code").notNull(),
+  language: text("language").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  views: integer("views").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertSnippetSchema = createInsertSchema(snippets).pick({
+  title: true,
+  description: true,
+  code: true,
+  language: true,
+  userId: true,
+});
+
+export const comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  snippetId: integer("snippet_id").notNull().references(() => snippets.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertCommentSchema = createInsertSchema(comments).pick({
+  content: true,
+  snippetId: true,
+  userId: true,
+});
+
+export const likes = pgTable("likes", {
+  id: serial("id").primaryKey(),
+  snippetId: integer("snippet_id").notNull().references(() => snippets.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLikeSchema = createInsertSchema(likes).pick({
+  snippetId: true,
+  userId: true,
+});
+
+export const bookmarks = pgTable("bookmarks", {
+  id: serial("id").primaryKey(),
+  snippetId: integer("snippet_id").notNull().references(() => snippets.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertBookmarkSchema = createInsertSchema(bookmarks).pick({
+  snippetId: true,
+  userId: true,
+});
+
+export type User = typeof users.$inferSelect;
+export type Snippet = typeof snippets.$inferSelect;
+export type Comment = typeof comments.$inferSelect;
+export type Like = typeof likes.$inferSelect;
+export type Bookmark = typeof bookmarks.$inferSelect;
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertSnippet = z.infer<typeof insertSnippetSchema>;
+export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type InsertLike = z.infer<typeof insertLikeSchema>;
+export type InsertBookmark = z.infer<typeof insertBookmarkSchema>;
+
+export type SnippetWithUser = Snippet & { user: User };
+export type CommentWithUser = Comment & { user: User };
