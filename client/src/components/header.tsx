@@ -47,6 +47,16 @@ export function Header() {
     logoutMutation.mutate();
   };
   
+  const handleCreateSnippetClick = () => {
+    if (!user) {
+      // 로그인이 안 되어 있으면 로그인 페이지로 이동
+      setLocation("/auth?tab=login");
+    } else {
+      // 로그인이 되어 있으면 스니펫 생성 다이얼로그 열기
+      setCreateSnippetOpen(true);
+    }
+  };
+  
   return (
     <header className="bg-background sticky top-0 z-30 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,7 +103,7 @@ export function Header() {
             
             {/* Create Snippet Button (Desktop) */}
             <Button
-              onClick={() => setCreateSnippetOpen(true)}
+              onClick={handleCreateSnippetClick}
               className="ml-4 hidden sm:flex items-center"
               size="sm"
             >
@@ -197,7 +207,7 @@ export function Header() {
                     <Button
                       onClick={() => {
                         setMobileMenuOpen(false);
-                        setCreateSnippetOpen(true);
+                        handleCreateSnippetClick();
                       }}
                       className="mt-3 w-full justify-center"
                     >
