@@ -30,7 +30,10 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
+  createUser(user: Partial<User>): Promise<User>;
+  verifyUser(userId: number): Promise<boolean>;
   
   // Snippet methods
   getSnippets(limit?: number, filter?: string, language?: string): Promise<SnippetWithUser[]>;
@@ -108,12 +111,51 @@ export class MemStorage implements IStorage {
       (user) => user.username === username,
     );
   }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email,
+    );
+  }
+  
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.verificationToken === token && user.isVerified === false,
+    );
+  }
+  
+  async verifyUser(userId: number): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+    
+    const updatedUser = {
+      ...user,
+      isVerified: true,
+      verificationToken: null,
+      tokenExpiry: null
+    };
+    
+    this.users.set(userId, updatedUser);
+    return true;
+  }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: Partial<User>): Promise<User> {
     const id = this.userCurrentId++;
     const createdAt = new Date();
-    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username)}&background=random`;
-    const user: User = { ...insertUser, id, createdAt, avatar };
+    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username || '')}&background=random`;
+    
+    const user: User = {
+      id,
+      username: insertUser.username || '',
+      email: insertUser.email || '',
+      password: insertUser.password || '',
+      avatar,
+      isVerified: insertUser.isVerified || false,
+      verificationToken: insertUser.verificationToken || null,
+      tokenExpiry: insertUser.tokenExpiry || null,
+      createdAt
+    };
+    
     this.users.set(id, user);
     return user;
   }
@@ -374,12 +416,54 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username)}&background=random`;
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+  
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          eq(users.verificationToken, token),
+          eq(users.isVerified, false)
+        )
+      );
+    return user;
+  }
+  
+  async verifyUser(userId: number): Promise<boolean> {
+    const result = await db
+      .update(users)
+      .set({
+        isVerified: true,
+        verificationToken: null,
+        tokenExpiry: null
+      })
+      .where(eq(users.id, userId));
+    
+    return !!result;
+  }
+  
+  async createUser(insertUser: Partial<User>): Promise<User> {
+    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username || '')}&background=random`;
+    
     const [user] = await db
       .insert(users)
-      .values({ ...insertUser, avatar, createdAt: new Date() })
+      .values({
+        username: insertUser.username || '',
+        email: insertUser.email || '',
+        password: insertUser.password || '',
+        avatar,
+        isVerified: insertUser.isVerified ?? false,
+        verificationToken: insertUser.verificationToken,
+        tokenExpiry: insertUser.tokenExpiry,
+        createdAt: new Date()
+      })
       .returning();
+      
     return user;
   }
   
