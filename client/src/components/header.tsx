@@ -23,7 +23,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Code, Search, Menu, Plus, User, Bookmark, Cog, LogOut } from "lucide-react";
 
 export function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const { user, logoutMutation } = useAuth();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -147,16 +147,21 @@ export function Header() {
             ) : (
               /* Login/Signup Buttons (Not Authenticated) */
               <div className="ml-4 flex items-center">
-                <Link href="/auth?tab=login">
-                  <Button variant="ghost" size="sm" className="text-sm font-medium">
-                    Log in
-                  </Button>
-                </Link>
-                <Link href="/auth?tab=register">
-                  <Button className="ml-2 text-sm font-medium" size="sm">
-                    Sign up
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium"
+                  asChild
+                >
+                  <a href="/auth?tab=login">Log in</a>
+                </Button>
+                <Button
+                  className="ml-2 text-sm font-medium"
+                  size="sm"
+                  asChild
+                >
+                  <a href="/auth?tab=register">Sign up</a>
+                </Button>
               </div>
             )}
             
