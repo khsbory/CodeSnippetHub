@@ -53,17 +53,16 @@ export default function AuthPage() {
   const params = new URLSearchParams(search);
   const defaultTab = params.get("tab") === "register" ? "register" : "login";
   
-  // Redirect if already logged in
+  // 인증 이메일 발송 상태 관리
+  const [verificationSent, setVerificationSent] = useState(false);
+
   useEffect(() => {
     if (user) {
       navigate("/");
     }
   }, [user, navigate]);
-  
-  // 상태 관리
-  const [verificationSent, setVerificationSent] = useState(false);
-  
-  // Login form
+
+  // 로그인 폼
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -72,8 +71,8 @@ export default function AuthPage() {
       rememberMe: false,
     },
   });
-  
-  // Register form
+
+  // 회원가입 폼
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -84,15 +83,14 @@ export default function AuthPage() {
       acceptTerms: false,
     },
   });
-  
-  // Form handlers
+
   const onLoginSubmit = (values: LoginFormValues) => {
     loginMutation.mutate({
       email: values.email,
       password: values.password,
     });
   };
-  
+
   const onRegisterSubmit = (values: RegisterFormValues) => {
     registerMutation.mutate({
       username: values.username,
@@ -104,38 +102,38 @@ export default function AuthPage() {
       }
     });
   };
-  
-  // If still checking auth status, show loading
+
+  // 로딩 중에는 로딩 UI 표시
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
       </div>
     );
   }
-  
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       
-      <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex flex-col md:flex-row gap-8 items-stretch">
+      <main className="flex-1">
+        <div className="container mx-auto py-8 px-4">
+          <div className="flex flex-col md:flex-row rounded-xl overflow-hidden shadow-lg max-w-6xl mx-auto">
             {/* Auth Forms */}
-            <div className="w-full md:w-1/2 md:max-w-md mx-auto">
+            <div className="w-full md:w-1/2 p-6 bg-background">
               <Tabs defaultValue={defaultTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login">Login</TabsTrigger>
-                  <TabsTrigger value="register">Register</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="login">로그인</TabsTrigger>
+                  <TabsTrigger value="register">회원가입</TabsTrigger>
                 </TabsList>
                 
                 {/* Login Tab */}
                 <TabsContent value="login">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Login to your account</CardTitle>
+                      <CardTitle>계정 로그인</CardTitle>
                       <CardDescription>
-                        Enter your credentials to access your account
+                        코드 스니펫을 공유하고 탐색할 수 있는 커뮤니티에 로그인하세요
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -152,8 +150,8 @@ export default function AuthPage() {
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input 
                                       placeholder="example@email.com" 
-                                      className="pl-10" 
                                       type="email" 
+                                      className="pl-10" 
                                       {...field} 
                                     />
                                   </div>
@@ -183,31 +181,27 @@ export default function AuthPage() {
                               </FormItem>
                             )}
                           />
-                          <div className="flex items-center justify-between">
-                            <FormField
+                          
+                          <FormField
                               control={loginForm.control}
                               name="rememberMe"
                               render={({ field }) => (
-                                <FormItem className="flex items-center space-x-2">
+                                <FormItem className="flex items-start space-x-2 mt-4">
                                   <FormControl>
                                     <Checkbox
                                       checked={field.value}
                                       onCheckedChange={field.onChange}
                                     />
                                   </FormControl>
-                                  <FormLabel className="text-sm font-normal cursor-pointer">
-                                    Remember me
-                                  </FormLabel>
+                                  <div className="space-y-1 leading-none">
+                                    <FormLabel className="text-sm font-normal cursor-pointer">
+                                      자동 로그인
+                                    </FormLabel>
+                                  </div>
                                 </FormItem>
                               )}
                             />
-                            <a 
-                              href="#" 
-                              className="text-sm font-medium text-primary hover:text-primary/80"
-                            >
-                              Forgot password?
-                            </a>
-                          </div>
+                          
                           <Button 
                             type="submit" 
                             className="w-full"
@@ -216,10 +210,10 @@ export default function AuthPage() {
                             {loginMutation.isPending ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Logging in...
+                                로그인 중...
                               </>
                             ) : (
-                              "Log in"
+                              "로그인"
                             )}
                           </Button>
                         </form>
@@ -231,7 +225,7 @@ export default function AuthPage() {
                         </div>
                         <div className="relative flex justify-center text-xs">
                           <span className="bg-background px-2 text-muted-foreground">
-                            Or continue with
+                            소셜 계정으로 로그인
                           </span>
                         </div>
                       </div>
@@ -386,20 +380,22 @@ export default function AuthPage() {
                                 </FormControl>
                                 <div className="space-y-1 leading-none">
                                   <FormLabel className="text-sm font-normal cursor-pointer">
-                                    I agree to the{" "}
-                                    <a 
-                                      href="#" 
-                                      className="text-primary hover:text-primary/80"
-                                    >
-                                      terms of service
-                                    </a>{" "}
-                                    and{" "}
-                                    <a 
-                                      href="#" 
-                                      className="text-primary hover:text-primary/80"
-                                    >
-                                      privacy policy
-                                    </a>
+                                    <span>
+                                      <a 
+                                        href="#" 
+                                        className="text-primary hover:text-primary/80 mr-1"
+                                      >
+                                        서비스 이용약관
+                                      </a>
+                                      과
+                                      <a 
+                                        href="#" 
+                                        className="text-primary hover:text-primary/80 mx-1"
+                                      >
+                                        개인정보 처리방침
+                                      </a>
+                                      에 동의합니다
+                                    </span>
                                   </FormLabel>
                                   <FormMessage />
                                 </div>
@@ -414,10 +410,10 @@ export default function AuthPage() {
                             {registerMutation.isPending ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating account...
+                                계정 생성 중...
                               </>
                             ) : (
-                              "Create account"
+                              "계정 생성하기"
                             )}
                           </Button>
                         </form>
@@ -429,7 +425,7 @@ export default function AuthPage() {
                         </div>
                         <div className="relative flex justify-center text-xs">
                           <span className="bg-background px-2 text-muted-foreground">
-                            Or continue with
+                            소셜 계정으로 가입
                           </span>
                         </div>
                       </div>
@@ -446,6 +442,7 @@ export default function AuthPage() {
                       </div>
                     </CardContent>
                   </Card>
+                  )}
                 </TabsContent>
               </Tabs>
             </div>
