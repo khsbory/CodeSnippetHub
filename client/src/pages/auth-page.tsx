@@ -452,12 +452,12 @@ export default function AuthPage() {
               <div className="max-w-md mx-auto">
                 <div className="flex items-center mb-6">
                   <Code className="h-8 w-8 mr-2" />
-                  <h2 className="text-2xl font-bold">Code Snippet Hub</h2>
+                  <h2 className="text-2xl font-bold">코드 스니펫 허브</h2>
                 </div>
-                <h3 className="text-3xl font-bold mb-4">Share Code. Learn Together.</h3>
+                <h3 className="text-3xl font-bold mb-4">코드 공유. 함께 배우기.</h3>
                 <p className="text-lg mb-6">
-                  Join our community of developers to share and discover code snippets, get feedback,
-                  and improve your coding skills.
+                  개발자 커뮤니티에 참여하여 코드 스니펫을 공유하고 발견하며, 피드백을 받고, 
+                  코딩 실력을 향상시키세요.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start">
@@ -466,7 +466,7 @@ export default function AuthPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <p>Syntax highlighting for 15+ programming languages</p>
+                    <p>15개 이상의 프로그래밍 언어 구문 강조 지원</p>
                   </div>
                   <div className="flex items-start">
                     <div className="rounded-full bg-white/10 p-1 mr-4">
@@ -474,7 +474,7 @@ export default function AuthPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <p>Save and organize your favorite code snippets</p>
+                    <p>즐겨찾는 코드 스니펫 저장 및 정리</p>
                   </div>
                   <div className="flex items-start">
                     <div className="rounded-full bg-white/10 p-1 mr-4">
@@ -482,7 +482,7 @@ export default function AuthPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <p>Get feedback from the community through comments</p>
+                    <p>댓글을 통한 커뮤니티 피드백 받기</p>
                   </div>
                 </div>
               </div>

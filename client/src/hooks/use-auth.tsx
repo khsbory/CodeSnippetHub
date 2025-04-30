@@ -44,13 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: Omit<User, 'password'>) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Login successful",
-        description: `Welcome back, ${user.username}!`,
+        title: "로그인 성공",
+        description: `${user.username}님, 다시 환영합니다!`,
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
+        title: "로그인 실패",
         description: error.message,
         variant: "destructive",
       });
@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: Omit<User, 'password'>) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Registration successful",
-        description: `Welcome, ${user.username}!`,
+        title: "회원가입 성공",
+        description: `${user.username}님, 환영합니다!`,
       });
     },
     onError: (error: Error) => {
