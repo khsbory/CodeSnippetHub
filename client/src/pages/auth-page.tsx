@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useRoute, useSearch } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -13,11 +13,12 @@ import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { useAuth } from "@/hooks/use-auth";
-import { Github, Twitter, Loader2, Code } from "lucide-react";
+import { Github, Twitter, Loader2, Code, Mail, LockKeyhole, User, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { loginSchema as apiLoginSchema, registerSchema as apiRegisterSchema } from "@shared/schema";
 
-const loginSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+// 클라이언트용 로그인 스키마 (rememberMe 옵션 추가)
+const loginSchema = apiLoginSchema.extend({
   rememberMe: z.boolean().optional(),
 });
 
