@@ -15,29 +15,32 @@ import { Footer } from "@/components/footer";
 import { useAuth } from "@/hooks/use-auth";
 import { Github, Twitter, Loader2, Code, Mail, LockKeyhole, User, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { loginSchema as apiLoginSchema, registerSchema as apiRegisterSchema } from "@shared/schema";
+import { loginSchema as apiLoginSchema } from "@shared/schema";
 
 // 클라이언트용 로그인 스키마 (rememberMe 옵션 추가)
 const loginSchema = apiLoginSchema.extend({
   rememberMe: z.boolean().optional(),
 });
 
+// 클라이언트용 회원가입 스키마 (이메일 회원가입 + 약관 동의)
 const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters"),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(100, "Password must be at most 100 characters"),
-  confirmPassword: z.string(),
+  username: z.string()
+    .min(3, "사용자 이름은 최소 3자 이상이어야 합니다")
+    .max(20, "사용자 이름은 최대 20자까지 가능합니다")
+    .regex(/^[a-zA-Z0-9_-]+$/, "사용자 이름은 영문자, 숫자, 밑줄(_), 하이픈(-)만 포함할 수 있습니다"),
+  email: z.string()
+    .email("유효한 이메일 주소를 입력해주세요"),
+  password: z.string()
+    .min(6, "비밀번호는 최소 6자 이상이어야 합니다")
+    .max(100, "비밀번호가 너무 깁니다"),
+  confirmPassword: z.string()
+    .min(1, "비밀번호 확인을 입력해주세요"),
   acceptTerms: z.boolean().refine(val => val, {
-    message: "You must accept the terms and conditions",
+    message: "이용약관에 동의해주세요",
   }),
 }).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
+  message: "비밀번호가 일치하지 않습니다",
+  path: ["confirmPassword"]
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -57,11 +60,14 @@ export default function AuthPage() {
     }
   }, [user, navigate]);
   
+  // 상태 관리
+  const [verificationSent, setVerificationSent] = useState(false);
+  
   // Login form
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
       rememberMe: false,
     },
@@ -72,6 +78,7 @@ export default function AuthPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
+      email: "",
       password: "",
       confirmPassword: "",
       acceptTerms: false,
@@ -81,7 +88,7 @@ export default function AuthPage() {
   // Form handlers
   const onLoginSubmit = (values: LoginFormValues) => {
     loginMutation.mutate({
-      username: values.username,
+      email: values.email,
       password: values.password,
     });
   };
@@ -89,7 +96,12 @@ export default function AuthPage() {
   const onRegisterSubmit = (values: RegisterFormValues) => {
     registerMutation.mutate({
       username: values.username,
+      email: values.email,
       password: values.password,
+    }, {
+      onSuccess: () => {
+        setVerificationSent(true);
+      }
     });
   };
   
@@ -131,12 +143,20 @@ export default function AuthPage() {
                         <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                           <FormField
                             control={loginForm.control}
-                            name="username"
+                            name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Username</FormLabel>
+                                <FormLabel>이메일</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="johndoe" {...field} />
+                                  <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      placeholder="example@email.com" 
+                                      className="pl-10" 
+                                      type="email" 
+                                      {...field} 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -147,9 +167,17 @@ export default function AuthPage() {
                             name="password"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel>비밀번호</FormLabel>
                                 <FormControl>
-                                  <Input type="password" placeholder="••••••••" {...field} />
+                                  <div className="relative">
+                                    <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      type="password" 
+                                      placeholder="••••••••" 
+                                      className="pl-10"
+                                      {...field} 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -239,9 +267,37 @@ export default function AuthPage() {
                             name="username"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Username</FormLabel>
+                                <FormLabel>사용자 이름</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="johndoe" {...field} />
+                                  <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      placeholder="johndoe" 
+                                      className="pl-10" 
+                                      {...field} 
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={registerForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>이메일</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      placeholder="example@email.com" 
+                                      type="email" 
+                                      className="pl-10" 
+                                      {...field} 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -252,9 +308,17 @@ export default function AuthPage() {
                             name="password"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel>비밀번호</FormLabel>
                                 <FormControl>
-                                  <Input type="password" placeholder="••••••••" {...field} />
+                                  <div className="relative">
+                                    <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      type="password" 
+                                      placeholder="••••••••" 
+                                      className="pl-10"
+                                      {...field} 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -265,9 +329,17 @@ export default function AuthPage() {
                             name="confirmPassword"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Confirm Password</FormLabel>
+                                <FormLabel>비밀번호 확인</FormLabel>
                                 <FormControl>
-                                  <Input type="password" placeholder="••••••••" {...field} />
+                                  <div className="relative">
+                                    <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      type="password" 
+                                      placeholder="••••••••" 
+                                      className="pl-10"
+                                      {...field} 
+                                    />
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
