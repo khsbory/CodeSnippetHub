@@ -95,6 +95,7 @@ export default function AuthPage() {
       username: values.email.split('@')[0], // 이메일에서 사용자 이름 자동 생성
       email: values.email,
       password: values.password,
+      fullName: values.fullName, // 성명 필드 추가
     }, {
       onSuccess: (response) => {
         // 인증 이메일 발송 여부 확인하고 UI 업데이트

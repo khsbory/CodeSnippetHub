@@ -31,9 +31,10 @@ const loginSchema = z.object({
 });
 type LoginData = z.infer<typeof loginSchema>;
 
-// 회원가입은 이메일, 비밀번호만 필요하고 사용자 이름은 백엔드에서 자동 생성
+// 회원가입은 이메일, 비밀번호, 성명이 필요하고 사용자 이름은 백엔드에서 자동 생성
 const registerSchema = z.object({
   email: z.string().email(),
+  fullName: z.string(),
   password: z.string(),
   username: z.string().optional() // 백엔드에서 자동 생성하므로 선택적
 });

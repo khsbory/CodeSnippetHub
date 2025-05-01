@@ -179,13 +179,21 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: Partial<User>): Promise<User> {
     const id = this.userCurrentId++;
     const createdAt = new Date();
-    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username || '')}&background=random`;
+    let avatarName = insertUser.username || '';
+    
+    // 만약 fullName이 있다면 아바타 생성 시 fullName 사용
+    if (insertUser.fullName) {
+      avatarName = insertUser.fullName;
+    }
+    
+    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=random`;
     
     const user: User = {
       id,
       username: insertUser.username || '',
       email: insertUser.email || '',
       password: insertUser.password || '',
+      fullName: insertUser.fullName || null,
       avatar,
       isVerified: insertUser.isVerified || false,
       isAdmin: insertUser.isAdmin || false,
@@ -553,13 +561,21 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createUser(insertUser: Partial<User>): Promise<User> {
-    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username || '')}&background=random`;
+    let avatarName = insertUser.username || '';
+    
+    // 만약 fullName이 있다면 아바타 생성 시 fullName 사용
+    if (insertUser.fullName) {
+      avatarName = insertUser.fullName;
+    }
+    
+    const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=random`;
     
     const [user] = await db
       .insert(users)
       .values({
         username: insertUser.username || '',
         email: insertUser.email || '',
+        fullName: insertUser.fullName || null,
         password: insertUser.password || '',
         avatar,
         isVerified: insertUser.isVerified ?? false,
