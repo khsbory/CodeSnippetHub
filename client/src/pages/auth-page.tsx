@@ -26,6 +26,9 @@ const loginSchema = apiLoginSchema.extend({
 const registerSchema = z.object({
   email: z.string()
     .email("유효한 이메일 주소를 입력해주세요"),
+  fullName: z.string()
+    .min(2, "이름은 최소 2자 이상이어야 합니다")
+    .max(50, "이름이 너무 깁니다"),
   password: z.string()
     .min(6, "비밀번호는 최소 6자 이상이어야 합니다")
     .max(100, "비밀번호가 너무 깁니다"),
@@ -73,6 +76,7 @@ export default function AuthPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       email: "",
+      fullName: "",
       password: "",
       confirmPassword: "",
       acceptTerms: false,
@@ -293,6 +297,28 @@ export default function AuthPage() {
                                     <Input 
                                       placeholder="example@email.com" 
                                       type="email" 
+                                      className="pl-10" 
+                                      {...field} 
+                                    />
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={registerForm.control}
+                            name="fullName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>성명</FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                      placeholder="홍길동" 
+                                      type="text" 
                                       className="pl-10" 
                                       {...field} 
                                     />

@@ -6,6 +6,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
+  fullName: text("full_name"), // 실명 필드 추가
   password: text("password").notNull(),
   avatar: text("avatar"),
   isVerified: boolean("is_verified").default(false).notNull(),
@@ -19,11 +20,15 @@ export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,
   password: true,
+  fullName: true,
 });
 
 export const registerSchema = z.object({
   email: z.string()
     .email("유효한 이메일 주소를 입력해주세요"),
+  fullName: z.string()
+    .min(2, "이름은 최소 2자 이상이어야 합니다")
+    .max(50, "이름이 너무 깁니다"),
   password: z.string()
     .min(6, "비밀번호는 최소 6자 이상이어야 합니다")
     .max(100, "비밀번호가 너무 깁니다"),
