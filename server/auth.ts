@@ -121,11 +121,12 @@ export function setupAuth(app: Express) {
         tokenExpiry,
       });
 
-      // 인증 이메일 전송
+      // 인증 이메일 전송 (요청 객체 전달)
       const emailSent = await sendVerificationEmail(
         req.body.email,
         req.body.username,
-        verificationToken
+        verificationToken,
+        req
       );
 
       // 민감 정보 제외하고 응답 반환

@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { randomBytes } from 'crypto';
+import { Request } from 'express';
 
 // 환경 변수에서 SMTP 설정 가져오기
 const smtpConfig = {
@@ -47,12 +48,27 @@ function createVerificationEmailTemplate(username: string, verificationUrl: stri
 export async function sendVerificationEmail(
   email: string, 
   username: string, 
-  verificationToken: string
+  verificationToken: string,
+  req?: Request
 ): Promise<boolean> {
   // 베이스 URL 결정 (개발/프로덕션)
-  const baseUrl = process.env.NODE_ENV === 'production' 
-    ? process.env.BASE_URL || 'https://codesnippethub.com' 
-    : 'http://localhost:5000';
+  let baseUrl = '';
+  
+  // 1. 요청 객체가 있는 경우 요청 헤더에서 호스트 정보 추출
+  if (req && req.headers && req.headers.host) {
+    const protocol = req.headers['x-forwarded-proto'] 
+      ? req.headers['x-forwarded-proto'] as string 
+      : req.protocol || 'http';
+    baseUrl = `${protocol}://${req.headers.host}`;
+  } 
+  // 2. NODE_ENV와 환경 변수로 결정
+  else {
+    baseUrl = process.env.NODE_ENV === 'production' 
+      ? (process.env.BASE_URL || process.env.REPL_SLUG && process.env.REPL_OWNER 
+        ? `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
+        : 'https://codesnippethub.replit.app')
+      : 'http://localhost:5000';
+  }
   
   // 인증 URL 생성
   const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
