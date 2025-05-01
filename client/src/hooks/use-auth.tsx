@@ -9,13 +9,19 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
+type RegisterResponse = {
+  needVerification?: boolean;
+  message?: string;
+  username?: string;
+} & Partial<Omit<User, 'password'>>;
+
 type AuthContextType = {
   user: Omit<User, 'password'> | null;
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<Omit<User, 'password'>, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<Omit<User, 'password'>, Error, RegisterData>;
+  registerMutation: UseMutationResult<RegisterResponse, Error, RegisterData>;
 };
 
 // 로그인은 이메일과 비밀번호만 필요

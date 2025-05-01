@@ -131,18 +131,18 @@ export function setupAuth(app: Express) {
       // 민감 정보 제외하고 응답 반환
       const { password, verificationToken: token, ...userWithoutSensitiveInfo } = user;
 
+      // 이메일 인증이 필요하므로 사용자 정보를 세션에 저장하지 않음
       if (emailSent) {
-        // 이메일 인증이 필요하므로 자동 로그인은 하지 않음
         res.status(201).json({ 
-          ...userWithoutSensitiveInfo,
+          needVerification: true,
           message: "가입이 완료되었습니다. 이메일 인증을 통해 계정을 활성화해주세요.",
-          needVerification: true
+          username: userWithoutSensitiveInfo.username
         });
       } else {
         res.status(201).json({ 
-          ...userWithoutSensitiveInfo,
+          needVerification: true,
           message: "가입이 완료되었으나 이메일 전송에 실패했습니다. 관리자에게 문의해주세요.",
-          needVerification: true
+          username: userWithoutSensitiveInfo.username
         });
       }
     } catch (error) {

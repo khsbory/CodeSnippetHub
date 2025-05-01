@@ -93,10 +93,8 @@ export default function AuthPage() {
       password: values.password,
     }, {
       onSuccess: (response) => {
-        // needVerification 플래그가 있으면 인증 이메일이 발송되었다는 UI 표시
-        if (response.needVerification) {
-          setVerificationSent(true);
-        }
+        // 인증 이메일 발송 여부 확인하고 UI 업데이트
+        setVerificationSent(true);
       }
     });
   };
