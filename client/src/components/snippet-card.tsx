@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { SyntaxHighlighter } from "@/components/syntax-highlighter";
@@ -43,7 +43,8 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
   };
   
   // Load statuses on mount and when user changes
-  useState(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
     loadLikeStatus();
     loadBookmarkStatus();
   }, [user, snippet.id]);
@@ -111,12 +112,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               className="h-8 w-8"
               onClick={() => bookmarkMutation.mutate()}
               disabled={bookmarkMutation.isPending}
+              aria-label={isBookmarked ? "북마크 제거" : "북마크 추가"}
             >
               <BookmarkIcon
                 className={cn(
                   "h-5 w-5",
                   isBookmarked ? "fill-primary text-primary" : "text-muted-foreground"
                 )}
+                aria-hidden="true"
               />
             </Button>
             <Button
@@ -125,12 +128,14 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               className="h-8 w-8"
               onClick={() => likeMutation.mutate()}
               disabled={likeMutation.isPending}
+              aria-label={isLiked ? "좋아요 취소" : "좋아요"}
             >
               <Heart
                 className={cn(
                   "h-5 w-5",
                   isLiked ? "fill-primary text-primary" : "text-muted-foreground"
                 )}
+                aria-hidden="true"
               />
             </Button>
           </div>
@@ -156,7 +161,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
       <CardFooter className="p-4 flex items-center justify-between">
         <div className="flex items-center">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={snippet.user.avatar} alt={snippet.user.username} />
+            <AvatarImage src={snippet.user.avatar || undefined} alt={snippet.user.username} />
             <AvatarFallback>{snippet.user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="ml-2">
