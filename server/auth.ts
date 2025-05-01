@@ -78,17 +78,34 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      // 사용자 이름 중복 체크
-      const existingUsername = await storage.getUserByUsername(req.body.username);
-      if (existingUsername) {
-        return res.status(400).json({ message: "이미 사용 중인 사용자 이름입니다" });
+      // 이메일이 없는 경우 오류 반환
+      if (!req.body.email) {
+        return res.status(400).json({ message: "이메일 주소는 필수입니다" });
       }
 
+      // 이메일에서 사용자 이름 생성 (@ 이전 부분)
+      const username = req.body.username || req.body.email.split('@')[0];
+      
+      // 사용자 이름 중복 체크 및 고유한 사용자 이름 생성
+      let uniqueUsername = username;
+      let existingUsername = await storage.getUserByUsername(uniqueUsername);
+      let count = 1;
+      
+      // 이미 존재하는 사용자 이름인 경우 숫자를 붙여 고유한 이름 생성
+      while (existingUsername) {
+        uniqueUsername = `${username}${count}`;
+        existingUsername = await storage.getUserByUsername(uniqueUsername);
+        count++;
+      }
+      
       // 이메일 중복 체크
       const existingEmail = await storage.getUserByEmail(req.body.email);
       if (existingEmail) {
         return res.status(400).json({ message: "이미 가입된 이메일 주소입니다" });
       }
+      
+      // req.body 업데이트 - 자동 생성된 사용자 이름 적용
+      req.body.username = uniqueUsername;
 
       // 인증 토큰 발급 (24시간 유효)
       const verificationToken = generateVerificationToken();

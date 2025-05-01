@@ -24,10 +24,6 @@ const loginSchema = apiLoginSchema.extend({
 
 // 클라이언트용 회원가입 스키마 (이메일 회원가입 + 약관 동의)
 const registerSchema = z.object({
-  username: z.string()
-    .min(3, "사용자 이름은 최소 3자 이상이어야 합니다")
-    .max(20, "사용자 이름은 최대 20자까지 가능합니다")
-    .regex(/^[a-zA-Z0-9_-]+$/, "사용자 이름은 영문자, 숫자, 밑줄(_), 하이픈(-)만 포함할 수 있습니다"),
   email: z.string()
     .email("유효한 이메일 주소를 입력해주세요"),
   password: z.string()
@@ -76,7 +72,6 @@ export default function AuthPage() {
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -87,14 +82,13 @@ export default function AuthPage() {
   const onLoginSubmit = (values: LoginFormValues) => {
     loginMutation.mutate({
       email: values.email,
-      password: values.password,
-      username: values.email.split('@')[0] // 임시로 username 설정
+      password: values.password
     });
   };
 
   const onRegisterSubmit = (values: RegisterFormValues) => {
     registerMutation.mutate({
-      username: values.username,
+      username: values.email.split('@')[0], // 이메일에서 사용자 이름 자동 생성
       email: values.email,
       password: values.password,
     }, {
@@ -285,26 +279,7 @@ export default function AuthPage() {
                       <CardContent>
                         <Form {...registerForm}>
                           <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                          <FormField
-                            control={registerForm.control}
-                            name="username"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>사용자 이름</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
-                                      placeholder="johndoe" 
-                                      className="pl-10" 
-                                      {...field} 
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+
                           <FormField
                             control={registerForm.control}
                             name="email"
