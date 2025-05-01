@@ -207,10 +207,10 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags (optional)</FormLabel>
+                  <FormLabel>태그 (선택사항)</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="e.g. algorithm, data-structure, function (comma separated)"
+                      placeholder="예: 알고리즘, 자료구조, 함수 (쉼표로 구분)"
                       {...field}
                     />
                   </FormControl>
@@ -221,13 +221,13 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
             
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="outline">Cancel</Button>
+                <Button type="button" variant="outline">취소</Button>
               </DialogClose>
               <Button 
                 type="submit" 
                 disabled={createSnippetMutation.isPending}
               >
-                {createSnippetMutation.isPending ? "Creating..." : "Create Snippet"}
+                {createSnippetMutation.isPending ? "생성 중..." : "스니펫 생성"}
               </Button>
             </DialogFooter>
           </form>
