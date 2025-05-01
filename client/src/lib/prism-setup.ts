@@ -25,10 +25,15 @@ import 'prismjs/components/prism-bash';
 // Plugins
 import 'prismjs/plugins/line-numbers/prism-line-numbers';
 
-// Add languages that require a different class name
-Prism.languages.html = Prism.languages.markup;
+// 손상된 Prism 객체가 있으면 안전하게 처리
+if (typeof Prism !== 'undefined') {
+  // Add languages that require a different class name
+  if (Prism.languages && Prism.languages.markup) {
+    Prism.languages.html = Prism.languages.markup;
+  }
 
-// Initialize Prism
-Prism.manual = true;
+  // Initialize Prism (명시적으로 수동 모드 설정)
+  Prism.manual = true;
+}
 
 export default Prism;

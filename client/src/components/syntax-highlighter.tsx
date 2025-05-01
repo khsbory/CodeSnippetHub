@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, ClipboardCopy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
-import Prism from "@/lib/prism-setup";
 
 // Map of language codes to display names
 const languageNames: Record<string, string> = {
@@ -23,6 +22,7 @@ const languageNames: Record<string, string> = {
   swift: "Swift",
   php: "PHP",
   markup: "HTML",
+  html: "HTML",
   sql: "SQL",
   bash: "Bash",
 };
@@ -45,6 +45,7 @@ const languageColors: Record<string, string> = {
   swift: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
   php: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
   markup: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+  html: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
   sql: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   bash: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
 };
@@ -69,13 +70,6 @@ export function SyntaxHighlighter({
   const { theme } = useTheme();
   const [isCopied, setIsCopied] = useState(false);
   const normalizedLanguage = language.toLowerCase();
-  const prismLanguage = normalizedLanguage === "html" ? "markup" : normalizedLanguage;
-  
-  useEffect(() => {
-    if (Prism) {
-      Prism.highlightAll();
-    }
-  }, [code, language, theme]);
   
   const copyToClipboard = async () => {
     try {
@@ -83,15 +77,27 @@ export function SyntaxHighlighter({
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy code:", err);
+      console.error("코드 복사 실패:", err);
     }
   };
   
   const displayLanguage = languageNames[normalizedLanguage] || language;
   const badgeColor = languageColors[normalizedLanguage] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
   
+  // 코드 줄 번호 생성 함수
+  const generateLineNumbers = () => {
+    const lines = code.split('\n');
+    return (
+      <div className="select-none text-right pr-3 text-muted-foreground">
+        {lines.map((_, i) => (
+          <div key={i}>{i + 1}</div>
+        ))}
+      </div>
+    );
+  };
+  
   return (
-    <div className="relative rounded-md overflow-hidden">
+    <div className="relative rounded-md overflow-hidden border border-border">
       {/* Language badge and copy button */}
       <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
         {showLanguageBadge && (
@@ -105,7 +111,7 @@ export function SyntaxHighlighter({
             size="icon"
             className="h-6 w-6 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-md"
             onClick={copyToClipboard}
-            aria-label="Copy code"
+            aria-label="코드 복사"
           >
             {isCopied ? (
               <Check className="h-3.5 w-3.5" />
@@ -118,17 +124,17 @@ export function SyntaxHighlighter({
       
       {/* Code block */}
       <div 
-        className={cn(
-          "bg-muted font-mono text-sm overflow-x-auto",
-          showLineNumbers && "line-numbers"
-        )}
+        className="bg-muted dark:bg-muted/70 font-mono text-sm overflow-x-auto text-foreground"
         style={{ maxHeight }}
       >
-        <pre className="p-4">
-          <code className={`language-${prismLanguage}`}>
-            {code}
-          </code>
-        </pre>
+        <div className="flex p-4">
+          {showLineNumbers && generateLineNumbers()}
+          <pre className="whitespace-pre overflow-x-auto flex-1">
+            <code>
+              {code}
+            </code>
+          </pre>
+        </div>
       </div>
     </div>
   );
