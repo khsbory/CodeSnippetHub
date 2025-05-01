@@ -57,8 +57,25 @@ export default function AdminPage() {
   // 사용자 삭제 뮤테이션
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
-      const res = await apiRequest("DELETE", `/api/admin/users/${userId}`);
-      return res.json();
+      try {
+        const res = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+        // 204 (No Content)은 성공이지만 응답 본문이 없음
+        if (res.status === 204) {
+          return { success: true };
+        }
+        
+        // 다른 상태 코드의 경우 응답 본문을 확인
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "사용자 삭제 중 오류가 발생했습니다.");
+        }
+        return data;
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error("사용자 삭제 중 오류가 발생했습니다.");
+      }
     },
     onSuccess: () => {
       toast({
@@ -68,6 +85,7 @@ export default function AdminPage() {
       // 사용자 목록 갱신
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       setIsDialogOpen(false);
+      setUserIdToDelete(null); // 삭제 후 ID 초기화
     },
     onError: (error: Error) => {
       toast({
@@ -75,6 +93,7 @@ export default function AdminPage() {
         description: error.message,
         variant: "destructive",
       });
+      setIsDialogOpen(false); // 오류 발생 시에도 다이얼로그 닫기
     },
   });
 
