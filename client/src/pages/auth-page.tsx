@@ -292,11 +292,11 @@ export default function AuthPage() {
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>이메일</FormLabel>
+                                <FormLabel htmlFor="register-email">이메일</FormLabel>
                                 <FormControl>
                                   <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
+                                    <Mail aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="register-email" 
                                       placeholder="example@email.com" 
                                       type="email" 
                                       className="pl-10" 
@@ -314,11 +314,11 @@ export default function AuthPage() {
                             name="fullName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>성명</FormLabel>
+                                <FormLabel htmlFor="register-fullName">성명</FormLabel>
                                 <FormControl>
                                   <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
+                                    <User aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="register-fullName" 
                                       placeholder="홍길동" 
                                       type="text" 
                                       className="pl-10" 
