@@ -93,7 +93,7 @@ export function Header() {
               size="icon"
               onClick={() => setSearchOpen(true)}
               className="text-muted-foreground"
-              aria-label="Search"
+              aria-label="검색"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -182,7 +182,7 @@ export function Header() {
                   variant="ghost"
                   size="icon"
                   className="ml-2 sm:hidden"
-                  aria-label="Open menu"
+                  aria-label="메뉴 열기"
                 >
                   <Menu className="h-5 w-5" />
                 </Button>

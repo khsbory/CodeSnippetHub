@@ -11,7 +11,7 @@ export function DarkModeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label="다크 모드로 전환"
       aria-pressed={isDarkMode}
     >
       {theme === "light" ? (
