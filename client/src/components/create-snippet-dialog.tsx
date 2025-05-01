@@ -119,7 +119,7 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Create New Snippet</DialogTitle>
+          <DialogTitle>새 코드 스니펫 생성</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -129,9 +129,9 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>제목</FormLabel>
                   <FormControl>
-                    <Input placeholder="Give your snippet a title" {...field} />
+                    <Input placeholder="스니펫의 제목을 입력하세요" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,17 +143,17 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
               name="language"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Language</FormLabel>
+                  <FormLabel>프로그래밍 언어</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a language" />
+                        <SelectValue placeholder="프로그래밍 언어 선택" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent position="popper" sideOffset={8}>
                       {LANGUAGES.map((language) => (
                         <SelectItem key={language.value} value={language.value}>
                           {language.label}
@@ -171,10 +171,10 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
               name="code"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Code</FormLabel>
+                  <FormLabel>코드</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Paste your code here"
+                      placeholder="여기에 코드를 붙여넣으세요"
                       className="font-mono text-sm h-40 resize-y"
                       {...field}
                     />
@@ -189,10 +189,10 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (optional)</FormLabel>
+                  <FormLabel>설명 (선택사항)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Explain what your code does"
+                      placeholder="코드가 무엇을 하는지 설명해주세요"
                       className="resize-y"
                       {...field}
                     />
