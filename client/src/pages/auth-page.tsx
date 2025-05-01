@@ -145,11 +145,11 @@ export default function AuthPage() {
                             name="email"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>이메일</FormLabel>
+                                <FormLabel htmlFor="login-email">이메일</FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
+                                    <Input id="login-email" 
                                       placeholder="example@email.com" 
                                       type="email" 
                                       className="pl-10" 
@@ -166,11 +166,11 @@ export default function AuthPage() {
                             name="password"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>비밀번호</FormLabel>
+                                <FormLabel htmlFor="login-password">비밀번호</FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
+                                    <Input id="login-password" 
                                       type="password" 
                                       placeholder="••••••••" 
                                       className="pl-10"
@@ -335,11 +335,11 @@ export default function AuthPage() {
                             name="password"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>비밀번호</FormLabel>
+                                <FormLabel htmlFor="register-password">비밀번호</FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
+                                    <Input id="register-password" 
                                       type="password" 
                                       placeholder="••••••••" 
                                       className="pl-10"
@@ -356,7 +356,7 @@ export default function AuthPage() {
                             name="confirmPassword"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>비밀번호 확인</FormLabel>
+                                <FormLabel htmlFor="register-passwordConfirm">비밀번호 확인</FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
