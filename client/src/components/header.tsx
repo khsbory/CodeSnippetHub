@@ -135,7 +135,7 @@ export function Header() {
                   <DropdownMenuLabel>내 계정</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
+                    <Link href={`/users/${user.id}`} className="cursor-pointer">
                       <User className="h-4 w-4 mr-2" /> 프로필
                     </Link>
                   </DropdownMenuItem>
@@ -149,11 +149,18 @@ export function Header() {
                       <Bookmark className="h-4 w-4 mr-2" /> 북마크
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings" className="cursor-pointer">
-                      <Cog className="h-4 w-4 mr-2" /> 설정
-                    </Link>
-                  </DropdownMenuItem>
+                  {/* 관리자 메뉴 */}
+                  {user.isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>관리자</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="cursor-pointer">
+                          <ShieldAlert className="h-4 w-4 mr-2" /> 관리자 페이지
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleLogout}
@@ -214,6 +221,23 @@ export function Header() {
                         </Link>
                       </DrawerClose>
                     ))}
+                    
+                    {/* 관리자 메뉴 - 모바일 */}
+                    {user && user.isAdmin && (
+                      <DrawerClose asChild>
+                        <Link
+                          href="/admin"
+                          className={`px-3 py-2 rounded-md text-base font-medium ${
+                            isActiveRoute("/admin")
+                              ? "bg-primary/10 text-primary"
+                              : "text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <ShieldAlert className="h-4 w-4 mr-2 inline-block" /> 관리자 페이지
+                        </Link>
+                      </DrawerClose>
+                    )}
+                    
                     <Button
                       onClick={() => {
                         setMobileMenuOpen(false);
