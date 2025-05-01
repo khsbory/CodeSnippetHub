@@ -34,6 +34,8 @@ export interface IStorage {
   getUserByVerificationToken(token: string): Promise<User | undefined>;
   createUser(user: Partial<User>): Promise<User>;
   verifyUser(userId: number): Promise<boolean>;
+  getAllUsers(): Promise<User[]>;
+  deleteUser(userId: number): Promise<boolean>;
   
   // Snippet methods
   getSnippets(limit?: number, filter?: string, language?: string): Promise<SnippetWithUser[]>;
@@ -139,6 +141,41 @@ export class MemStorage implements IStorage {
     return true;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values()).sort((a, b) => a.id - b.id);
+  }
+  
+  async deleteUser(userId: number): Promise<boolean> {
+    // 사용자를 삭제하기 전에 관련된 모든 데이터 삭제
+    
+    // 사용자의 모든 스니펫 찾기
+    const userSnippets = Array.from(this.snippets.values())
+      .filter(snippet => snippet.userId === userId);
+      
+    // 각 스니펫 삭제 (관련 댓글, 좋아요, 북마크도 함께 삭제됨)
+    for (const snippet of userSnippets) {
+      await this.deleteSnippet(snippet.id);
+    }
+    
+    // 사용자가 작성한 댓글 삭제
+    Array.from(this.comments.values())
+      .filter(comment => comment.userId === userId)
+      .forEach(comment => this.comments.delete(comment.id));
+      
+    // 사용자의 좋아요 삭제
+    Array.from(this.likes.values())
+      .filter(like => like.userId === userId)
+      .forEach(like => this.likes.delete(like.id));
+      
+    // 사용자의 북마크 삭제
+    Array.from(this.bookmarks.values())
+      .filter(bookmark => bookmark.userId === userId)
+      .forEach(bookmark => this.bookmarks.delete(bookmark.id));
+    
+    // 마지막으로 사용자 삭제
+    return this.users.delete(userId);
+  }
+
   async createUser(insertUser: Partial<User>): Promise<User> {
     const id = this.userCurrentId++;
     const createdAt = new Date();
@@ -151,6 +188,7 @@ export class MemStorage implements IStorage {
       password: insertUser.password || '',
       avatar,
       isVerified: insertUser.isVerified || false,
+      isAdmin: insertUser.isAdmin || false,
       verificationToken: insertUser.verificationToken || null,
       tokenExpiry: insertUser.tokenExpiry || null,
       createdAt

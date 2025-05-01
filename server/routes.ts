@@ -10,7 +10,15 @@ const isAuthenticated = (req: Request, res: Response, next: () => void) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.status(401).json({ message: "Not authenticated" });
+  res.status(401).json({ message: "인증이 필요합니다" });
+};
+
+// Middleware to check admin privileges
+const isAdmin = (req: Request, res: Response, next: () => void) => {
+  if (req.isAuthenticated() && req.user && req.user.isAdmin) {
+    return next();
+  }
+  res.status(403).json({ message: "관리자 권한이 필요합니다" });
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {

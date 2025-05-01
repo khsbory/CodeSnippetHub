@@ -132,18 +132,17 @@ export function setupAuth(app: Express) {
       const { password, verificationToken: token, ...userWithoutSensitiveInfo } = user;
 
       if (emailSent) {
-        // 바로 로그인 처리 (이메일 인증이 필요한 경우에는 여기를 주석 처리)
-        req.login(user, (err) => {
-          if (err) return next(err);
-          res.status(201).json({ 
-            ...userWithoutSensitiveInfo,
-            message: "가입이 완료되었습니다. 이메일 인증을 통해 계정을 활성화해주세요."
-          });
+        // 이메일 인증이 필요하므로 자동 로그인은 하지 않음
+        res.status(201).json({ 
+          ...userWithoutSensitiveInfo,
+          message: "가입이 완료되었습니다. 이메일 인증을 통해 계정을 활성화해주세요.",
+          needVerification: true
         });
       } else {
         res.status(201).json({ 
           ...userWithoutSensitiveInfo,
-          message: "가입이 완료되었으나 이메일 전송에 실패했습니다. 관리자에게 문의해주세요."
+          message: "가입이 완료되었으나 이메일 전송에 실패했습니다. 관리자에게 문의해주세요.",
+          needVerification: true
         });
       }
     } catch (error) {
