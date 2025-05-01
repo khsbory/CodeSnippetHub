@@ -20,7 +20,17 @@ import {
   DrawerTrigger
 } from "@/components/ui/drawer";
 import { useAuth } from "@/hooks/use-auth";
-import { Code, Search, Menu, Plus, User, Bookmark, Cog, LogOut } from "lucide-react";
+import { 
+  Code, 
+  Search, 
+  Menu, 
+  Plus, 
+  User, 
+  Bookmark, 
+  Cog, 
+  LogOut, 
+  ShieldAlert 
+} from "lucide-react";
 
 export function Header() {
   const [location, setLocation] = useLocation();

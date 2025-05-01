@@ -15,6 +15,7 @@ import MySnippetsPage from "@/pages/my-snippets-page";
 import BookmarksPage from "@/pages/bookmarks-page";
 import ExplorePage from "@/pages/explore-page";
 import SearchResultsPage from "@/pages/search-results-page";
+import AdminPage from "@/pages/admin-page";
 import "@/styles/prism-theme.css";
 
 function Router() {
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/search" component={SearchResultsPage} />
       <ProtectedRoute path="/my-snippets" component={MySnippetsPage} />
       <ProtectedRoute path="/bookmarks" component={BookmarksPage} />
+      <ProtectedRoute path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );
