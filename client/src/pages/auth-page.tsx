@@ -190,12 +190,13 @@ export default function AuthPage() {
                                 <FormItem className="flex items-start space-x-2 mt-4">
                                   <FormControl>
                                     <Checkbox
+                                      id="rememberMe"
                                       checked={field.value}
                                       onCheckedChange={field.onChange}
                                     />
                                   </FormControl>
                                   <div className="space-y-1 leading-none">
-                                    <FormLabel className="text-sm font-normal cursor-pointer">
+                                    <FormLabel htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
                                       자동 로그인
                                     </FormLabel>
                                   </div>
@@ -378,12 +379,13 @@ export default function AuthPage() {
                               <FormItem className="flex items-start space-x-2 mt-4">
                                 <FormControl>
                                   <Checkbox
+                                    id="acceptTerms"
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
                                   />
                                 </FormControl>
                                 <div className="space-y-1 leading-none">
-                                  <FormLabel className="text-sm font-normal cursor-pointer">
+                                  <FormLabel htmlFor="acceptTerms" className="text-sm font-normal cursor-pointer">
                                     <span>
                                       <a 
                                         href="#" 
