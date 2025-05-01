@@ -18,10 +18,19 @@ type AuthContextType = {
   registerMutation: UseMutationResult<Omit<User, 'password'>, Error, RegisterData>;
 };
 
-const loginSchema = insertUserSchema;
+// 로그인은 이메일과 비밀번호만 필요
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string()
+});
 type LoginData = z.infer<typeof loginSchema>;
 
-const registerSchema = insertUserSchema;
+// 회원가입은 이메일, 비밀번호만 필요하고 사용자 이름은 백엔드에서 자동 생성
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+  username: z.string().optional() // 백엔드에서 자동 생성하므로 선택적
+});
 type RegisterData = z.infer<typeof registerSchema>;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
