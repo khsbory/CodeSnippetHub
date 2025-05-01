@@ -169,7 +169,7 @@ export default function AuthPage() {
                                 <FormLabel htmlFor="login-password">비밀번호</FormLabel>
                                 <FormControl>
                                   <div className="relative">
-                                    <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input id="login-password" 
                                       type="password" 
                                       placeholder="••••••••" 
@@ -338,7 +338,7 @@ export default function AuthPage() {
                                 <FormLabel htmlFor="register-password">비밀번호</FormLabel>
                                 <FormControl>
                                   <div className="relative">
-                                    <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input id="register-password" 
                                       type="password" 
                                       placeholder="••••••••" 
@@ -359,8 +359,8 @@ export default function AuthPage() {
                                 <FormLabel htmlFor="register-passwordConfirm">비밀번호 확인</FormLabel>
                                 <FormControl>
                                   <div className="relative">
-                                    <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input 
+                                    <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="register-passwordConfirm" 
                                       type="password" 
                                       placeholder="••••••••" 
                                       className="pl-10"
