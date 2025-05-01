@@ -31,10 +31,10 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   
   const navigation = [
-    { name: "Home", href: "/" },
-    { name: "Explore", href: "/explore" },
-    { name: "My Snippets", href: "/my-snippets" },
-    { name: "Bookmarks", href: "/bookmarks" },
+    { name: "홈", href: "/" },
+    { name: "탐색", href: "/explore" },
+    { name: "내 스니펫", href: "/my-snippets" },
+    { name: "북마크", href: "/bookmarks" },
   ];
   
   const isActiveRoute = (path: string) => {
@@ -65,7 +65,7 @@ export function Header() {
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center">
               <Code className="h-6 w-6 text-primary mr-2" />
-              <span className="font-bold text-lg">Code Snippet Hub</span>
+              <span className="font-bold text-lg">코드 스니펫 허브</span>
             </Link>
             
             {/* Desktop Navigation */}
@@ -107,7 +107,7 @@ export function Header() {
               className="ml-4 hidden sm:flex items-center"
               size="sm"
             >
-              <Plus className="h-4 w-4 mr-1" /> Create Snippet
+              <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
             </Button>
             
             {/* User Menu (Authenticated) */}
@@ -122,26 +122,26 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuLabel>내 계정</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="cursor-pointer">
-                      <User className="h-4 w-4 mr-2" /> Profile
+                      <User className="h-4 w-4 mr-2" /> 프로필
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/my-snippets" className="cursor-pointer">
-                      <Code className="h-4 w-4 mr-2" /> My Snippets
+                      <Code className="h-4 w-4 mr-2" /> 내 스니펫
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/bookmarks" className="cursor-pointer">
-                      <Bookmark className="h-4 w-4 mr-2" /> Bookmarks
+                      <Bookmark className="h-4 w-4 mr-2" /> 북마크
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="cursor-pointer">
-                      <Cog className="h-4 w-4 mr-2" /> Settings
+                      <Cog className="h-4 w-4 mr-2" /> 설정
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -150,7 +150,7 @@ export function Header() {
                     disabled={logoutMutation.isPending}
                     className="cursor-pointer"
                   >
-                    <LogOut className="h-4 w-4 mr-2" /> Log Out
+                    <LogOut className="h-4 w-4 mr-2" /> 로그아웃
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -163,14 +163,14 @@ export function Header() {
                   className="text-sm font-medium"
                   asChild
                 >
-                  <a href="/auth?tab=login">Log in</a>
+                  <a href="/auth?tab=login">로그인</a>
                 </Button>
                 <Button
                   className="ml-2 text-sm font-medium"
                   size="sm"
                   asChild
                 >
-                  <a href="/auth?tab=register">Sign up</a>
+                  <a href="/auth?tab=register">회원가입</a>
                 </Button>
               </div>
             )}
@@ -211,7 +211,7 @@ export function Header() {
                       }}
                       className="mt-3 w-full justify-center"
                     >
-                      <Plus className="h-4 w-4 mr-1" /> Create Snippet
+                      <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
                     </Button>
                   </nav>
                 </div>
