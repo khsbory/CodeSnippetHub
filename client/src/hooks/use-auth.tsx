@@ -71,12 +71,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: (user: Omit<User, 'password'>) => {
-      queryClient.setQueryData(["/api/user"], user);
-      toast({
-        title: "회원가입 성공",
-        description: `${user.username}님, 환영합니다!`,
-      });
+    onSuccess: (response: any) => {
+      // needVerification이 true면 사용자를 로그인 상태로 설정하지 않음
+      if (response.needVerification) {
+        // 사용자 상태를 업데이트하지 않고 이메일 인증 필요 메시지만 표시
+        toast({
+          title: "이메일 인증이 필요합니다",
+          description: `${response.username}님, 이메일 인증 후 로그인해주세요.`,
+        });
+      } else {
+        // 기존 로직: 인증이 필요 없는 경우 바로 로그인 상태로 설정
+        queryClient.setQueryData(["/api/user"], response);
+        toast({
+          title: "회원가입 성공",
+          description: `${response.username}님, 환영합니다!`,
+        });
+      }
     },
     onError: (error: Error) => {
       toast({

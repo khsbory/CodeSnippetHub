@@ -92,8 +92,11 @@ export default function AuthPage() {
       email: values.email,
       password: values.password,
     }, {
-      onSuccess: () => {
-        setVerificationSent(true);
+      onSuccess: (response) => {
+        // needVerification 플래그가 있으면 인증 이메일이 발송되었다는 UI 표시
+        if (response.needVerification) {
+          setVerificationSent(true);
+        }
       }
     });
   };
