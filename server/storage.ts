@@ -485,6 +485,73 @@ export class DatabaseStorage implements IStorage {
     return !!result;
   }
   
+  async getAllUsers(): Promise<User[]> {
+    const allUsers = await db
+      .select()
+      .from(users)
+      .orderBy(users.id);
+    
+    return allUsers;
+  }
+  
+  async deleteUser(userId: number): Promise<boolean> {
+    try {
+      // 사용자가 작성한 댓글 삭제
+      await db
+        .delete(comments)
+        .where(eq(comments.userId, userId));
+
+      // 사용자의 좋아요 삭제
+      await db
+        .delete(likes)
+        .where(eq(likes.userId, userId));
+
+      // 사용자의 북마크 삭제
+      await db
+        .delete(bookmarks)
+        .where(eq(bookmarks.userId, userId));
+      
+      // 사용자가 작성한 스니펫 찾기
+      const userSnippets = await db
+        .select()
+        .from(snippets)
+        .where(eq(snippets.userId, userId));
+      
+      // 각 스니펫에 대해 관련 데이터 삭제
+      for (const snippet of userSnippets) {
+        // 해당 스니펫에 대한 모든 댓글 삭제
+        await db
+          .delete(comments)
+          .where(eq(comments.snippetId, snippet.id));
+        
+        // 해당 스니펫에 대한 모든 좋아요 삭제
+        await db
+          .delete(likes)
+          .where(eq(likes.snippetId, snippet.id));
+        
+        // 해당 스니펫에 대한 모든 북마크 삭제
+        await db
+          .delete(bookmarks)
+          .where(eq(bookmarks.snippetId, snippet.id));
+        
+        // 스니펫 삭제
+        await db
+          .delete(snippets)
+          .where(eq(snippets.id, snippet.id));
+      }
+      
+      // 마지막으로 사용자 삭제
+      await db
+        .delete(users)
+        .where(eq(users.id, userId));
+      
+      return true;
+    } catch (error) {
+      console.error('사용자 삭제 오류:', error);
+      return false;
+    }
+  }
+  
   async createUser(insertUser: Partial<User>): Promise<User> {
     const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(insertUser.username || '')}&background=random`;
     
@@ -496,6 +563,7 @@ export class DatabaseStorage implements IStorage {
         password: insertUser.password || '',
         avatar,
         isVerified: insertUser.isVerified ?? false,
+        isAdmin: insertUser.isAdmin ?? false,
         verificationToken: insertUser.verificationToken,
         tokenExpiry: insertUser.tokenExpiry,
         createdAt: new Date()
