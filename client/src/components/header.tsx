@@ -74,7 +74,7 @@ export function Header() {
           <div className="flex items-center">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center">
-              <Code className="h-6 w-6 text-primary mr-2" />
+              <Code className="h-6 w-6 text-primary mr-2" aria-hidden="true" />
               <span className="font-bold text-lg">코드 스니펫 허브</span>
             </Link>
             
@@ -127,7 +127,7 @@ export function Header() {
                   <Button variant="ghost" className="ml-4 h-8 w-8 rounded-full">
                     <Avatar>
                       <AvatarImage src={user.avatar} alt={user.username} />
-                      <AvatarFallback>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback aria-label={`${user.username}의 프로필 이미지`}>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
@@ -136,17 +136,17 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href={`/users/${user.id}`} className="cursor-pointer">
-                      <User className="h-4 w-4 mr-2" /> 프로필
+                      <User className="h-4 w-4 mr-2" aria-hidden="true" /> 프로필
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/my-snippets" className="cursor-pointer">
-                      <Code className="h-4 w-4 mr-2" /> 내 스니펫
+                      <Code className="h-4 w-4 mr-2" aria-hidden="true" /> 내 스니펫
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/bookmarks" className="cursor-pointer">
-                      <Bookmark className="h-4 w-4 mr-2" /> 북마크
+                      <Bookmark className="h-4 w-4 mr-2" aria-hidden="true" /> 북마크
                     </Link>
                   </DropdownMenuItem>
                   {/* 관리자 메뉴 */}
@@ -156,7 +156,7 @@ export function Header() {
                       <DropdownMenuLabel>관리자</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
                         <Link href="/admin" className="cursor-pointer">
-                          <ShieldAlert className="h-4 w-4 mr-2" /> 관리자 페이지
+                          <ShieldAlert className="h-4 w-4 mr-2" aria-hidden="true" /> 관리자 페이지
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -167,7 +167,7 @@ export function Header() {
                     disabled={logoutMutation.isPending}
                     className="cursor-pointer"
                   >
-                    <LogOut className="h-4 w-4 mr-2" /> 로그아웃
+                    <LogOut className="h-4 w-4 mr-2" aria-hidden="true" /> 로그아웃
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -233,7 +233,7 @@ export function Header() {
                               : "text-foreground hover:bg-muted"
                           }`}
                         >
-                          <ShieldAlert className="h-4 w-4 mr-2 inline-block" /> 관리자 페이지
+                          <ShieldAlert className="h-4 w-4 mr-2 inline-block" aria-hidden="true" /> 관리자 페이지
                         </Link>
                       </DrawerClose>
                     )}
