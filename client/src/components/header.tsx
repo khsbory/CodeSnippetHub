@@ -124,11 +124,11 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link 
-                      href={`/users/${user.id}`} 
+                      href="/profile" 
                       className="cursor-pointer"
-                      aria-current={isActiveRoute(`/users/${user.id}`) ? "page" : undefined}
+                      aria-current={isActiveRoute("/profile") ? "page" : undefined}
                     >
-                      <User className="h-4 w-4 mr-2" aria-hidden="true" /> 프로필
+                      <User className="h-4 w-4 mr-2" aria-hidden="true" /> 내 프로필
                     </Link>
                   </DropdownMenuItem>
                   {/* 관리자 메뉴 */}
@@ -208,6 +208,23 @@ export function Header() {
                         </Link>
                       </DrawerClose>
                     ))}
+                    
+                    {/* 내 프로필 - 모바일 */}
+                    {user && (
+                      <DrawerClose asChild>
+                        <Link
+                          href="/profile"
+                          aria-current={isActiveRoute("/profile") ? "page" : undefined}
+                          className={`px-3 py-2 rounded-md text-base font-medium ${
+                            isActiveRoute("/profile")
+                              ? "bg-primary/10 text-primary"
+                              : "text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <User className="h-4 w-4 mr-2 inline-block" aria-hidden="true" /> 내 프로필
+                        </Link>
+                      </DrawerClose>
+                    )}
                     
                     {/* 관리자 메뉴 - 모바일 */}
                     {user && user.isAdmin && (

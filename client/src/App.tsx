@@ -23,6 +23,7 @@ function Router() {
       <Route path="/category/:category" component={CategoryPage} />
       <Route path="/snippets/:id" component={SnippetDetailPage} />
       <Route path="/users/:id" component={UserProfilePage} />
+      <ProtectedRoute path="/profile" component={UserProfilePage} />
       <Route path="/search" component={SearchResultsPage} />
       <Route path="/auth" component={AuthPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
