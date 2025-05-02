@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -72,6 +72,20 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategory);
+  
+  // 이 함수는 다이얼로그가 닫힐 때 포커스를 스니펫 작성 버튼으로 돌려보내는 역할을 합니다
+  useEffect(() => {
+    if (!open) {
+      // 다이얼로그가 닫힐 때 스니펫 작성 버튼에 포커스를 이동
+      const createButton = document.querySelector('[aria-label="스니펫 생성"]') || 
+                           document.querySelector('button:has(.h-4.w-4.mr-1)');
+      if (createButton && createButton instanceof HTMLElement) {
+        setTimeout(() => {
+          createButton.focus();
+        }, 0);
+      }
+    }
+  }, [open]);
   
   // Initialize form with default values
   const form = useForm<CreateSnippetFormValues>({

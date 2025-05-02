@@ -103,6 +103,7 @@ export function Header() {
                 onClick={handleCreateSnippetClick}
                 className="ml-4 hidden sm:flex items-center"
                 size="sm"
+                aria-label="스니펫 생성"
               >
                 <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
               </Button>
@@ -250,6 +251,7 @@ export function Header() {
                           handleCreateSnippetClick();
                         }}
                         className="mt-3 w-full justify-center"
+                        aria-label="스니펫 생성"
                       >
                         <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
                       </Button>
