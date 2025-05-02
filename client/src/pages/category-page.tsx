@@ -246,7 +246,7 @@ export default function CategoryPage() {
                   <Button
                     onClick={() => navigate("/auth")}
                   >
-                    로그인하고 코드 공유하기
+                    코드 공유하기
                   </Button>
                 )}
               </div>
@@ -295,7 +295,7 @@ export default function CategoryPage() {
                 </Button>
               ) : (
                 <Button onClick={() => navigate("/auth")}>
-                  로그인하고 코드 공유하기
+                  코드 공유하기
                 </Button>
               )}
             </div>

@@ -139,7 +139,7 @@ export default function HomePage() {
                   className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
                   size="lg"
                 >
-                  로그인하고 코드 공유하기
+                  코드 공유하기
                 </Button>
               )}
             </div>
@@ -208,7 +208,7 @@ export default function HomePage() {
                 </Button>
               ) : (
                 <Button onClick={() => navigate("/auth")}>
-                  로그인하고 코드 공유하기
+                  코드 공유하기
                 </Button>
               )}
             </div>
