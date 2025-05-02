@@ -126,7 +126,7 @@ export function Header() {
                 className="ml-4 hidden sm:flex items-center"
                 size="sm"
               >
-                <User className="h-4 w-4 mr-1" /> 로그인하고 코드 공유하기
+                <User className="h-4 w-4 mr-1" /> 코드 공유하기
               </Button>
             )}
             
@@ -264,7 +264,7 @@ export function Header() {
                           onClick={() => setLocation('/auth')}
                           className="mt-3 w-full justify-center"
                         >
-                          <User className="h-4 w-4 mr-1" /> 로그인하고 스니펫 생성
+                          <User className="h-4 w-4 mr-1" /> 코드 공유하기
                         </Button>
                       </DrawerClose>
                     )}
