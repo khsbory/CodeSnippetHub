@@ -50,6 +50,8 @@ export const snippets = pgTable("snippets", {
   description: text("description"),
   code: text("code").notNull(),
   language: text("language").notNull(),
+  // 새로운 카테고리 필드 추가 ('web', 'ios', 'android')
+  category: text("category").notNull().default('web'),
   userId: integer("user_id").notNull().references(() => users.id),
   views: integer("views").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -60,6 +62,7 @@ export const insertSnippetSchema = createInsertSchema(snippets).pick({
   description: true,
   code: true,
   language: true,
+  category: true,
   userId: true,
 });
 
