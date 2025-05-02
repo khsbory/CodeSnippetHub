@@ -48,13 +48,20 @@ const LANGUAGES = [
 ];
 
 export default function HomePage() {
-  const [filter, setFilter] = useState("latest");
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
-  // Fetch snippets with filter and language (all categories for homepage)
+  // Fetch snippets with language (all categories for homepage)
   const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
-    queryKey: ["/api/snippets", filter, language, "all"],
+    queryKey: ["/api/snippets", language, "all"],
+    queryFn: async ({ queryKey }) => {
+      const [_, language, category] = queryKey;
+      const response = await fetch(`/api/snippets?language=${language}&category=${category}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch snippets');
+      }
+      return response.json();
+    }
   });
   
   return (

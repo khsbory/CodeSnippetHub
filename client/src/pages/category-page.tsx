@@ -76,7 +76,6 @@ const CATEGORIES = {
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("latest");
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
@@ -86,13 +85,13 @@ export default function CategoryPage() {
     description: `${category} 관련 코드 모음입니다.`
   };
   
-  // Fetch snippets with filter, language, and specific category
+  // Fetch snippets with language for specific category
   const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
-    queryKey: ["/api/snippets", filter, language, category],
+    queryKey: ["/api/snippets", language, category],
     // Make sure category parameter is passed to the API
     queryFn: async ({ queryKey }) => {
-      const [_, filter, language, category] = queryKey;
-      const response = await fetch(`/api/snippets?filter=${filter}&language=${language}&category=${category}`);
+      const [_, language, category] = queryKey;
+      const response = await fetch(`/api/snippets?language=${language}&category=${category}`);
       if (!response.ok) {
         throw new Error('Failed to fetch snippets');
       }
@@ -151,27 +150,7 @@ export default function CategoryPage() {
               <Button type="submit">검색</Button>
             </form>
             
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">정렬</label>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    onClick={() => setFilter("latest")}
-                    variant={filter === "latest" ? "default" : "outline"}
-                    size="sm"
-                  >
-                    최신순
-                  </Button>
-                  <Button
-                    onClick={() => setFilter("popular")}
-                    variant={filter === "popular" ? "default" : "outline"}
-                    size="sm"
-                  >
-                    인기순
-                  </Button>
-                </div>
-              </div>
-              
+            <div className="flex flex-col sm:flex-row gap-4">              
               <div className="space-y-2">
                 <label className="text-sm font-medium">언어</label>
                 <Select
