@@ -13,8 +13,9 @@ import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { useAuth } from "@/hooks/use-auth";
-import { Github, Twitter, Loader2, Code, Mail, LockKeyhole, User, AlertCircle } from "lucide-react";
+import { Github, Twitter, Loader2, Code, Mail, LockKeyhole, User, AlertCircle, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 import { loginSchema as apiLoginSchema } from "@shared/schema";
 
 // 클라이언트용 로그인 스키마 (rememberMe 옵션 추가)
@@ -22,7 +23,7 @@ const loginSchema = apiLoginSchema.extend({
   rememberMe: z.boolean().optional(),
 });
 
-// 클라이언트용 회원가입 스키마 (이메일 회원가입 + 약관 동의)
+// 클라이언트용 회원가입 스키마 (이메일 회원가입)
 const registerSchema = z.object({
   email: z.string()
     .email("유효한 이메일 주소를 입력해주세요"),
@@ -34,9 +35,6 @@ const registerSchema = z.object({
     .max(100, "비밀번호가 너무 깁니다"),
   confirmPassword: z.string()
     .min(1, "비밀번호 확인을 입력해주세요"),
-  acceptTerms: z.boolean().refine(val => val, {
-    message: "이용약관에 동의해주세요",
-  }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "비밀번호가 일치하지 않습니다",
   path: ["confirmPassword"]
@@ -59,6 +57,10 @@ export default function AuthPage() {
   
   // 인증 이메일 발송 상태 관리
   const [verificationSent, setVerificationSent] = useState(false);
+  
+  // 비밀번호 찾기 모드
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -84,7 +86,6 @@ export default function AuthPage() {
       fullName: "",
       password: "",
       confirmPassword: "",
-      acceptTerms: false,
     },
   });
 
@@ -379,42 +380,7 @@ export default function AuthPage() {
                               </FormItem>
                             )}
                           />
-                          <FormField
-                            control={registerForm.control}
-                            name="acceptTerms"
-                            render={({ field }) => (
-                              <FormItem className="flex items-start space-x-2 mt-4">
-                                <FormControl>
-                                  <Checkbox
-                                    id="acceptTerms"
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel htmlFor="acceptTerms" className="text-sm font-normal cursor-pointer">
-                                    <span>
-                                      <a 
-                                        href="#" 
-                                        className="text-primary hover:text-primary/80 mr-1"
-                                      >
-                                        서비스 이용약관
-                                      </a>
-                                      과
-                                      <a 
-                                        href="#" 
-                                        className="text-primary hover:text-primary/80 mx-1"
-                                      >
-                                        개인정보 처리방침
-                                      </a>
-                                      에 동의합니다
-                                    </span>
-                                  </FormLabel>
-                                  <FormMessage />
-                                </div>
-                              </FormItem>
-                            )}
-                          />
+
                           <Button 
                             type="submit" 
                             className="w-full"
@@ -467,10 +433,9 @@ export default function AuthPage() {
                   <Code className="h-8 w-8 mr-2" />
                   <h2 className="text-2xl font-bold">코드 스니펫 허브</h2>
                 </div>
-                <h3 className="text-3xl font-bold mb-4">코드 공유. 함께 배우기.</h3>
+                <h3 className="text-3xl font-bold mb-4">접근성 코드 모음</h3>
                 <p className="text-lg mb-6">
-                  개발자 커뮤니티에 참여하여 코드 스니펫을 공유하고 발견하며, 피드백을 받고, 
-                  코딩 실력을 향상시키세요.
+                  접근성 관련 코드 스니펫을 찾고 공유하세요.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start">
@@ -479,23 +444,7 @@ export default function AuthPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <p>15개 이상의 프로그래밍 언어 구문 강조 지원</p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="rounded-full bg-white/10 p-1 mr-4">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p>즐겨찾는 코드 스니펫 저장 및 정리</p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="rounded-full bg-white/10 p-1 mr-4">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p>댓글을 통한 커뮤니티 피드백 받기</p>
+                    <p>Web, iOS, Android 접근성 코드</p>
                   </div>
                 </div>
               </div>
