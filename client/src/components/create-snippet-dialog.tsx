@@ -12,6 +12,8 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 // 카테고리별 언어 분류
 const CATEGORY_LANGUAGES = {
@@ -253,11 +255,20 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
                 <FormItem>
                   <FormLabel>설명 (선택사항)</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="코드가 무엇을 하는지 설명해주세요"
-                      className="resize-y h-32"
-                      {...field}
-                    />
+                    <div className="border rounded-md overflow-hidden">
+                      <CKEditor
+                        editor={ClassicEditor}
+                        data={field.value}
+                        onChange={(_, editor) => {
+                          const data = editor.getData();
+                          field.onChange(data);
+                        }}
+                        config={{
+                          toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'undo', 'redo'],
+                          placeholder: "코드가 무엇을 하는지 설명해주세요",
+                        }}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
