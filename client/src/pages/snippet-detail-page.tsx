@@ -4,13 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SyntaxHighlighter } from "@/components/syntax-highlighter";
-import { CommentSection } from "@/components/comment-section";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Share2, ArrowLeft, Eye } from "lucide-react";
+import { Link, ArrowLeft, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -35,21 +34,19 @@ export default function SnippetDetailPage() {
     snippet ? `${snippet.description} - ${snippet.language} 코드 스니펫` : '코드 스니펫 상세 페이지'
   );
 
-  // 좋아요와 북마크 기능 제거
-
-  // Share snippet
-  const shareSnippet = async () => {
+  // Share snippet URL
+  const copyUrl = async () => {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
       toast({
-        title: "Link copied",
-        description: "Snippet link copied to clipboard",
+        title: "URL 복사됨",
+        description: "스니펫 URL이 클립보드에 복사되었습니다",
       });
     } catch (error) {
       toast({
-        title: "Error sharing snippet",
-        description: "Could not copy the link to clipboard",
+        title: "URL 복사 실패",
+        description: "클립보드에 복사할 수 없습니다",
         variant: "destructive",
       });
     }
@@ -59,8 +56,8 @@ export default function SnippetDetailPage() {
   useEffect(() => {
     if (error) {
       toast({
-        title: "Error loading snippet",
-        description: "The snippet could not be found or has been removed",
+        title: "스니펫 로딩 오류",
+        description: "스니펫을 찾을 수 없거나 삭제되었습니다",
         variant: "destructive",
       });
       navigate("/");
@@ -79,7 +76,7 @@ export default function SnippetDetailPage() {
               onClick={() => navigate('/')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              뒤로
             </Button>
             
             <div className="space-y-4">
@@ -98,11 +95,7 @@ export default function SnippetDetailPage() {
               
               <div className="flex gap-3 mt-4">
                 <Skeleton className="h-9 w-24" />
-                <Skeleton className="h-9 w-24" />
-                <Skeleton className="h-9 w-24" />
               </div>
-              
-              <Skeleton className="h-32 w-full mt-8" />
             </div>
           </div>
         </main>
@@ -130,7 +123,7 @@ export default function SnippetDetailPage() {
             onClick={() => navigate('/')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            뒤로
           </Button>
           
           <h1 className="text-3xl font-bold mb-2">{snippet.title}</h1>
@@ -186,14 +179,12 @@ export default function SnippetDetailPage() {
             <Button
               variant="outline"
               className="flex items-center gap-2"
-              onClick={shareSnippet}
+              onClick={copyUrl}
             >
-              <Share2 className="h-4 w-4" />
-              Share
+              <Link className="h-4 w-4" />
+              URL 복사
             </Button>
           </div>
-          
-          <CommentSection snippetId={snippetId} />
         </div>
       </main>
       <Footer />
