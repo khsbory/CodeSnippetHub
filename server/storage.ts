@@ -38,14 +38,14 @@ export interface IStorage {
   deleteUser(userId: number): Promise<boolean>;
   
   // Snippet methods
-  getSnippets(limit?: number, filter?: string, language?: string): Promise<SnippetWithUser[]>;
+  getSnippets(limit?: number, filter?: string, language?: string, category?: string): Promise<SnippetWithUser[]>;
   getSnippetById(id: number): Promise<SnippetWithUser | undefined>;
   getSnippetsByUserId(userId: number): Promise<SnippetWithUser[]>;
   createSnippet(snippet: InsertSnippet): Promise<Snippet>;
   updateSnippet(id: number, snippet: Partial<InsertSnippet>): Promise<Snippet | undefined>;
   deleteSnippet(id: number): Promise<boolean>;
   incrementSnippetViews(id: number): Promise<boolean>;
-  searchSnippets(query: string): Promise<SnippetWithUser[]>;
+  searchSnippets(query: string, category?: string): Promise<SnippetWithUser[]>;
   
   // Comment methods
   getCommentsBySnippetId(snippetId: number): Promise<CommentWithUser[]>;
@@ -207,12 +207,17 @@ export class MemStorage implements IStorage {
   }
   
   // Snippet methods
-  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all'): Promise<SnippetWithUser[]> {
+  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all', category: string = 'all'): Promise<SnippetWithUser[]> {
     let snippets = Array.from(this.snippets.values());
     
     // Apply language filter if not 'all'
     if (language !== 'all') {
       snippets = snippets.filter(snippet => snippet.language === language);
+    }
+    
+    // Apply category filter if not 'all'
+    if (category !== 'all') {
+      snippets = snippets.filter(snippet => snippet.category === category);
     }
     
     // Apply sorting based on filter
@@ -283,7 +288,14 @@ export class MemStorage implements IStorage {
     const id = this.snippetCurrentId++;
     const views = 0;
     const createdAt = new Date();
-    const snippet: Snippet = { ...insertSnippet, id, views, createdAt };
+    const snippet: Snippet = { 
+      ...insertSnippet, 
+      id, 
+      views, 
+      createdAt,
+      description: insertSnippet.description || null,
+      category: insertSnippet.category || 'web' // Default to 'web' category
+    };
     this.snippets.set(id, snippet);
     return snippet;
   }
@@ -323,21 +335,28 @@ export class MemStorage implements IStorage {
     return true;
   }
   
-  async searchSnippets(query: string): Promise<SnippetWithUser[]> {
+  async searchSnippets(query: string, category: string = 'all'): Promise<SnippetWithUser[]> {
     const lowerQuery = query.toLowerCase();
     
-    const matchingSnippets = Array.from(this.snippets.values())
+    let matchingSnippets = Array.from(this.snippets.values())
       .filter(snippet => 
         snippet.title.toLowerCase().includes(lowerQuery) ||
         (snippet.description || '').toLowerCase().includes(lowerQuery) ||
         snippet.language.toLowerCase().includes(lowerQuery) ||
         snippet.code.toLowerCase().includes(lowerQuery)
-      )
-      .sort((a, b) => {
-        const aTime = a.createdAt?.getTime() || 0;
-        const bTime = b.createdAt?.getTime() || 0;
-        return bTime - aTime;
-      });
+      );
+      
+    // Apply category filter if not 'all'
+    if (category !== 'all') {
+      matchingSnippets = matchingSnippets.filter(snippet => snippet.category === category);
+    }
+    
+    // Sort by creation date (newest first)
+    matchingSnippets = matchingSnippets.sort((a, b) => {
+      const aTime = a.createdAt?.getTime() || 0;
+      const bTime = b.createdAt?.getTime() || 0;
+      return bTime - aTime;
+    });
     
     // Combine with user data
     const snippetsWithUser = await Promise.all(
@@ -590,7 +609,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Snippet methods
-  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all'): Promise<SnippetWithUser[]> {
+  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all', category: string = 'all'): Promise<SnippetWithUser[]> {
     let query = db.select({
       snippet: snippets,
       user: users
@@ -598,9 +617,22 @@ export class DatabaseStorage implements IStorage {
     .from(snippets)
     .innerJoin(users, eq(snippets.userId, users.id));
     
+    // Apply filters
+    let conditions = [];
+    
     // Filter by language if specified
     if (language !== 'all') {
-      query = query.where(eq(snippets.language, language));
+      conditions.push(eq(snippets.language, language));
+    }
+    
+    // Filter by category if specified
+    if (category !== 'all') {
+      conditions.push(eq(snippets.category, category));
+    }
+    
+    // Apply WHERE clause if any conditions exist
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
     
     // Apply sorting based on filter
@@ -666,7 +698,8 @@ export class DatabaseStorage implements IStorage {
         ...insertSnippet, 
         createdAt: new Date(),
         views: 0,
-        description: insertSnippet.description || null // Ensure description is not undefined
+        description: insertSnippet.description || null, // Ensure description is not undefined
+        category: insertSnippet.category || 'web' // Default to 'web' category
       })
       .returning();
     
@@ -714,8 +747,22 @@ export class DatabaseStorage implements IStorage {
     return !!updated;
   }
   
-  async searchSnippets(query: string): Promise<SnippetWithUser[]> {
+  async searchSnippets(query: string, category: string = 'all'): Promise<SnippetWithUser[]> {
     const searchPattern = `%${query}%`;
+    
+    // Build search conditions
+    const searchConditions = or(
+      like(snippets.title, searchPattern),
+      like(snippets.description, searchPattern),
+      like(snippets.code, searchPattern),
+      like(snippets.language, searchPattern)
+    );
+    
+    // Add category filter if specified
+    let whereCondition = searchConditions;
+    if (category !== 'all') {
+      whereCondition = and(searchConditions, eq(snippets.category, category));
+    }
     
     const results = await db.select({
       snippet: snippets,
@@ -723,14 +770,7 @@ export class DatabaseStorage implements IStorage {
     })
     .from(snippets)
     .innerJoin(users, eq(snippets.userId, users.id))
-    .where(
-      or(
-        like(snippets.title, searchPattern),
-        like(snippets.description, searchPattern),
-        like(snippets.code, searchPattern),
-        like(snippets.language, searchPattern)
-      )
-    )
+    .where(whereCondition)
     .orderBy(desc(snippets.createdAt));
     
     return results.map((result: any) => ({
