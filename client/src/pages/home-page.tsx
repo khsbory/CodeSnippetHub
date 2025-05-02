@@ -123,26 +123,15 @@ export default function HomePage() {
           <section className="mb-8 text-center py-8 px-4 sm:px-6 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
             <h1 className="text-3xl font-bold mb-3">접근성 코드 모음</h1>
             <p className="text-lg mb-6 max-w-2xl mx-auto">접근성 구현 코드를 배워 보세요.</p>
-            <div className="flex flex-wrap justify-center gap-4">
-              {user && (
-                <Button
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
-                  size="lg"
-                >
-                  스니펫 생성
-                </Button>
-              )}
-              {!user && (
-                <Button
-                  onClick={() => navigate("/auth")}
-                  className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
-                  size="lg"
-                >
-                  코드 공유하기
-                </Button>
-              )}
-            </div>
+            {user && (
+              <Button
+                onClick={() => setCreateDialogOpen(true)}
+                className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
+                size="lg"
+              >
+                스니펫 생성
+              </Button>
+            )}
           </section>
 
           {/* Language selection */}
@@ -202,13 +191,9 @@ export default function HomePage() {
                   ? `${LANGUAGES.find(lang => lang.value === language)?.label} 스니펫이 없습니다. 다른 언어를 시도하거나 첫 번째로 공유해보세요!`
                   : "아직 스니펫이 없습니다. 첫 번째로 코드를 공유해보세요!"}
               </p>
-              {user ? (
+              {user && (
                 <Button onClick={() => setCreateDialogOpen(true)}>
                   스니펫 생성
-                </Button>
-              ) : (
-                <Button onClick={() => navigate("/auth")}>
-                  코드 공유하기
                 </Button>
               )}
             </div>

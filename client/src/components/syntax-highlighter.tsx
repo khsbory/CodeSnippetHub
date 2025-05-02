@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ClipboardCopy } from "lucide-react";
+import { Check, ClipboardCopy, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
@@ -57,6 +57,8 @@ interface SyntaxHighlighterProps {
   maxHeight?: string;
   showLanguageBadge?: boolean;
   showCopyButton?: boolean;
+  showShareButton?: boolean;
+  snippetId?: number;
   title?: string;
 }
 
@@ -67,10 +69,13 @@ export function SyntaxHighlighter({
   maxHeight = "200px",
   showLanguageBadge = true,
   showCopyButton = true,
+  showShareButton = true,
+  snippetId,
   title,
 }: SyntaxHighlighterProps) {
   const { theme } = useTheme();
   const [isCopied, setIsCopied] = useState(false);
+  const [isUrlCopied, setIsUrlCopied] = useState(false);
   const normalizedLanguage = language.toLowerCase();
   
   const copyToClipboard = async () => {
@@ -80,6 +85,19 @@ export function SyntaxHighlighter({
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error("코드 복사 실패:", err);
+    }
+  };
+  
+  const copyUrlToClipboard = async () => {
+    if (!snippetId) return;
+    
+    try {
+      const url = `${window.location.origin}/snippets/${snippetId}`;
+      await navigator.clipboard.writeText(url);
+      setIsUrlCopied(true);
+      setTimeout(() => setIsUrlCopied(false), 2000);
+    } catch (err) {
+      console.error("URL 복사 실패:", err);
     }
   };
   
@@ -107,12 +125,28 @@ export function SyntaxHighlighter({
   
   return (
     <div className="relative rounded-md overflow-hidden border border-border">
-      {/* Language badge and copy button */}
+      {/* Language badge and copy buttons */}
       <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
         {showLanguageBadge && (
           <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-medium", badgeColor)}>
             {displayLanguage}
           </span>
+        )}
+        {showShareButton && snippetId && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-md"
+            onClick={copyUrlToClipboard}
+            aria-label="URL 복사"
+            title={title ? `${title} 공유 링크 복사하기` : "공유 링크 복사하기"}
+          >
+            {isUrlCopied ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <LinkIcon className="h-3.5 w-3.5" />
+            )}
+          </Button>
         )}
         {showCopyButton && (
           <Button

@@ -53,6 +53,7 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
           code={snippet.code}
           language={snippet.language}
           showLanguageBadge={false}
+          snippetId={snippet.id}
           title={snippet.title}
         />
       </CardContent>
