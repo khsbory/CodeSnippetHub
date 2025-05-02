@@ -26,8 +26,6 @@ import {
   Menu, 
   Plus, 
   User, 
-  Bookmark, 
-  Cog, 
   LogOut, 
   ShieldAlert 
 } from "lucide-react";
@@ -142,15 +140,6 @@ export function Header() {
                       aria-current={isActiveRoute(`/users/${user.id}`) ? "page" : undefined}
                     >
                       <User className="h-4 w-4 mr-2" aria-hidden="true" /> 프로필
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link 
-                      href="/bookmarks" 
-                      className="cursor-pointer"
-                      aria-current={isActiveRoute("/bookmarks") ? "page" : undefined}
-                    >
-                      <Bookmark className="h-4 w-4 mr-2" aria-hidden="true" /> 북마크
                     </Link>
                   </DropdownMenuItem>
                   {/* 관리자 메뉴 */}

@@ -11,7 +11,6 @@ import HomePage from "@/pages/home-page";
 import CategoryPage from "@/pages/category-page";
 import SnippetDetailPage from "@/pages/snippet-detail-page";
 import UserProfilePage from "@/pages/user-profile-page";
-import MySnippetsPage from "@/pages/my-snippets-page";
 import SearchResultsPage from "@/pages/search-results-page";
 import AuthPage from "@/pages/auth-page";
 import AdminPage from "@/pages/admin-page";
@@ -26,7 +25,6 @@ function Router() {
       <Route path="/users/:id" component={UserProfilePage} />
       <Route path="/search" component={SearchResultsPage} />
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/my-snippets" component={MySnippetsPage} />
       <ProtectedRoute path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
