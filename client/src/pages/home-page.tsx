@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { SnippetWithUser } from "@shared/schema";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SnippetCard } from "@/components/snippet-card";
 import { useAuth } from "@/hooks/use-auth";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
@@ -49,8 +50,6 @@ const LANGUAGES = [
   ...CATEGORIES.android,
 ];
 
-import { usePageTitle } from "@/lib/usePageTitle";
-
 export default function HomePage() {
   usePageTitle("홈", "접근성 코드 모음 - 웹, iOS, Android 접근성 구현 코드 모음입니다.");
   
@@ -58,19 +57,61 @@ export default function HomePage() {
   const [, navigate] = useLocation();
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const PAGE_SIZE = 12;
+
+  // Ref for infinite scroll observation
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   
-  // Fetch snippets with language (all categories for homepage)
-  const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
+  // Fetch snippets with language, category, pagination
+  const { 
+    data, 
+    isLoading, 
+    isFetching, 
+    fetchNextPage, 
+    hasNextPage 
+  } = useInfiniteQuery({
     queryKey: ["/api/snippets", language, "all"],
-    queryFn: async ({ queryKey }) => {
-      const [_, language, category] = queryKey;
-      const response = await fetch(`/api/snippets?language=${language}&category=${category}`);
+    queryFn: async ({ queryKey, pageParam = 1 }) => {
+      const [_, lang, category] = queryKey as [string, string, string];
+      const response = await fetch(`/api/snippets?language=${lang}&category=${category}&page=${pageParam}&limit=${PAGE_SIZE}`);
       if (!response.ok) {
         throw new Error('Failed to fetch snippets');
       }
-      return response.json();
-    }
+      const data = await response.json();
+      return {
+        snippets: data,
+        nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
   });
+  
+  // All snippets flattened
+  const allSnippets = useMemo(() => {
+    return data?.pages?.flatMap(page => page.snippets) || [];
+  }, [data]);
+  
+  // Set up intersection observer for infinite scrolling
+  useEffect(() => {
+    if (loadMoreRef.current) {
+      observerRef.current = new IntersectionObserver(entries => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasNextPage && !isFetching) {
+          fetchNextPage();
+        }
+      }, { threshold: 0.5 });
+      
+      observerRef.current.observe(loadMoreRef.current);
+    }
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loadMoreRef, hasNextPage, isFetching, fetchNextPage]);
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -147,9 +188,9 @@ export default function HomePage() {
             <div className="flex justify-center items-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
-          ) : snippets && snippets.length > 0 ? (
+          ) : allSnippets.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {snippets.map(snippet => (
+              {allSnippets.map((snippet: SnippetWithUser) => (
                 <SnippetCard key={snippet.id} snippet={snippet} />
               ))}
             </div>
@@ -173,23 +214,16 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* More snippets button - 실제로는 추가 로드 구현이 필요합니다 */}
-          {!isLoading && snippets && snippets.length > 0 && (
-            <div className="mt-8 text-center">
-              <Button
-                variant="outline"
-                className="px-6 py-3"
-                disabled={isFetching}
-              >
-                {isFetching ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    로딩 중...
-                  </>
-                ) : (
-                  "스니펫 더 불러오기"
-                )}
-              </Button>
+          {/* 무한 스크롤 감지 영역 */}
+          {!isLoading && allSnippets.length > 0 && (
+            <div ref={loadMoreRef} className="h-10 w-full mt-8"></div>
+          )}
+
+          {/* 무한 스크롤용 로딩 인디케이터 */}
+          {isFetching && !isLoading && (
+            <div className="mt-8 text-center py-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+              <p className="text-sm text-muted-foreground mt-2">스니펫 로딩 중...</p>
             </div>
           )}
         </div>

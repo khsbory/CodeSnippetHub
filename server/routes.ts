@@ -33,8 +33,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const language = (req.query.language as string) || 'all';
       const category = (req.query.category as string) || 'all';
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const filter = (req.query.filter as string) || 'latest';
       
-      const snippets = await storage.getSnippets(limit, language, category);
+      const snippets = await storage.getSnippets(limit, filter, language, category, page);
       res.json(snippets);
     } catch (error) {
       res.status(500).json({ message: "Error fetching snippets" });
