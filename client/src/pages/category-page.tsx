@@ -86,15 +86,32 @@ export default function CategoryPage() {
     description: `${category} 관련 코드 모음입니다.`
   };
   
-  // Fetch snippets with filter, language, and category
+  // Fetch snippets with filter, language, and specific category
   const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
     queryKey: ["/api/snippets", filter, language, category],
+    // Make sure category parameter is passed to the API
+    queryFn: async ({ queryKey }) => {
+      const [_, filter, language, category] = queryKey;
+      const response = await fetch(`/api/snippets?filter=${filter}&language=${language}&category=${category}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch snippets');
+      }
+      return response.json();
+    },
     enabled: !searchQuery, // Don't fetch when searching
   });
   
-  // Fetch search results when search query changes
+  // Fetch search results when search query changes, specific to this category
   const { data: searchResults, isLoading: isSearching } = useQuery<SnippetWithUser[]>({
     queryKey: ["/api/snippets/search", searchQuery, category],
+    queryFn: async ({ queryKey }) => {
+      const [_, query, category] = queryKey;
+      const response = await fetch(`/api/snippets/search?q=${query}&category=${category}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch search results');
+      }
+      return response.json();
+    },
     enabled: !!searchQuery.trim(),
   });
   
