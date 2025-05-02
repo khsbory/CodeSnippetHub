@@ -45,7 +45,6 @@ export function Header() {
     { name: "웹", href: "/category/web" },
     { name: "iOS", href: "/category/ios" },
     { name: "Android", href: "/category/android" },
-    { name: "내 스니펫", href: "/my-snippets" },
   ];
   
   const isActiveRoute = (path: string) => {
@@ -85,6 +84,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
+                  aria-current={isActiveRoute(item.href) ? "page" : undefined}
                   className={`px-3 py-2 text-sm font-medium ${
                     isActiveRoute(item.href)
                       ? "border-b-2 border-primary text-foreground"
@@ -136,17 +136,20 @@ export function Header() {
                   <DropdownMenuLabel>내 계정</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={`/users/${user.id}`} className="cursor-pointer">
+                    <Link 
+                      href={`/users/${user.id}`} 
+                      className="cursor-pointer"
+                      aria-current={isActiveRoute(`/users/${user.id}`) ? "page" : undefined}
+                    >
                       <User className="h-4 w-4 mr-2" aria-hidden="true" /> 프로필
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/my-snippets" className="cursor-pointer">
-                      <Code className="h-4 w-4 mr-2" aria-hidden="true" /> 내 스니펫
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/bookmarks" className="cursor-pointer">
+                    <Link 
+                      href="/bookmarks" 
+                      className="cursor-pointer"
+                      aria-current={isActiveRoute("/bookmarks") ? "page" : undefined}
+                    >
                       <Bookmark className="h-4 w-4 mr-2" aria-hidden="true" /> 북마크
                     </Link>
                   </DropdownMenuItem>
@@ -156,7 +159,11 @@ export function Header() {
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>관리자</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer">
+                        <Link 
+                          href="/admin" 
+                          className="cursor-pointer"
+                          aria-current={isActiveRoute("/admin") ? "page" : undefined}
+                        >
                           <ShieldAlert className="h-4 w-4 mr-2" aria-hidden="true" /> 관리자 페이지
                         </Link>
                       </DropdownMenuItem>
@@ -212,6 +219,7 @@ export function Header() {
                       <DrawerClose asChild key={item.name}>
                         <Link
                           href={item.href}
+                          aria-current={isActiveRoute(item.href) ? "page" : undefined}
                           className={`px-3 py-2 rounded-md text-base font-medium ${
                             isActiveRoute(item.href)
                               ? "bg-primary/10 text-primary"
@@ -228,6 +236,7 @@ export function Header() {
                       <DrawerClose asChild>
                         <Link
                           href="/admin"
+                          aria-current={isActiveRoute("/admin") ? "page" : undefined}
                           className={`px-3 py-2 rounded-md text-base font-medium ${
                             isActiveRoute("/admin")
                               ? "bg-primary/10 text-primary"
