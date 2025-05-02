@@ -42,9 +42,10 @@ export function Header() {
   
   const navigation = [
     { name: "홈", href: "/" },
-    { name: "탐색", href: "/explore" },
+    { name: "웹", href: "/category/web" },
+    { name: "iOS", href: "/category/ios" },
+    { name: "Android", href: "/category/android" },
     { name: "내 스니펫", href: "/my-snippets" },
-    { name: "북마크", href: "/bookmarks" },
   ];
   
   const isActiveRoute = (path: string) => {

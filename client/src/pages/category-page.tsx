@@ -19,21 +19,18 @@ import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
 
 // Languages supported for filtering
 const LANGUAGES = [
-  { value: "all", label: "All Languages" },
+  { value: "all", label: "모든 언어" },
   { value: "javascript", label: "JavaScript" },
   { value: "typescript", label: "TypeScript" },
   { value: "python", label: "Python" },
   { value: "java", label: "Java" },
   { value: "csharp", label: "C#" },
   { value: "php", label: "PHP" },
-  { value: "ruby", label: "Ruby" },
-  { value: "go", label: "Go" },
-  { value: "kotlin", label: "Kotlin" },
   { value: "swift", label: "Swift" },
+  { value: "kotlin", label: "Kotlin" },
   { value: "html", label: "HTML" },
   { value: "css", label: "CSS" },
-  { value: "sql", label: "SQL" },
-  { value: "bash", label: "Bash" },
+  { value: "objectivec", label: "Objective-C" },
 ];
 
 // Category info mapping
@@ -66,7 +63,7 @@ export default function CategoryPage() {
   };
   
   // Fetch snippets with filter, language, and category
-  const { data: snippets, isLoading, isFetching, fetchNextPage, hasNextPage } = useQuery<SnippetWithUser[]>({
+  const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
     queryKey: ["/api/snippets", filter, language, category],
     enabled: !searchQuery, // Don't fetch when searching
   });
@@ -207,26 +204,7 @@ export default function CategoryPage() {
             </div>
           )}
           
-          {/* Load More Button */}
-          {!isLoadingData && displaySnippets && displaySnippets.length > 0 && !searchQuery.trim() && (
-            <div className="mt-8 text-center">
-              <Button
-                variant="outline"
-                onClick={() => fetchNextPage()}
-                disabled={isFetching || !hasNextPage}
-                className="px-6 py-3"
-              >
-                {isFetching ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                    로딩 중...
-                  </>
-                ) : (
-                  "더 보기"
-                )}
-              </Button>
-            </div>
-          )}
+
         </div>
       </main>
       <Footer />
