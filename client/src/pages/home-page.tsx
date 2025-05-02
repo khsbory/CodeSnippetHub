@@ -15,19 +15,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Languages supported for filtering
+// 카테고리별 언어 분류
+const CATEGORIES = {
+  web: [
+    { value: "javascript", label: "JavaScript" },
+    { value: "typescript", label: "TypeScript" },
+    { value: "jsx", label: "JSX" },
+    { value: "tsx", label: "TSX" },
+    { value: "html", label: "HTML" },
+    { value: "css", label: "CSS" },
+    { value: "scss", label: "SCSS" },
+  ],
+  ios: [
+    { value: "swift", label: "Swift" },
+    { value: "swiftui", label: "SwiftUI" },
+    { value: "objective-c", label: "Objective-C" },
+  ],
+  android: [
+    { value: "kotlin", label: "Kotlin" },
+    { value: "java", label: "Java" },
+    { value: "jetpack-compose", label: "Jetpack Compose" },
+    { value: "xml", label: "XML" },
+  ],
+};
+
+// 모든 언어 리스트
 const LANGUAGES = [
   { value: "all", label: "모든 언어" },
-  { value: "javascript", label: "JavaScript" },
-  { value: "typescript", label: "TypeScript" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
-  { value: "csharp", label: "C#" },
-  { value: "php", label: "PHP" },
-  { value: "ruby", label: "Ruby" },
-  { value: "go", label: "Go" },
-  { value: "kotlin", label: "Kotlin" },
-  { value: "swift", label: "Swift" },
+  ...CATEGORIES.web,
+  ...CATEGORIES.ios,
+  ...CATEGORIES.android,
 ];
 
 export default function HomePage() {
@@ -49,7 +66,7 @@ export default function HomePage() {
           {/* Hero section */}
           <section className="mb-8 text-center py-8 px-4 sm:px-6 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
             <h1 className="text-3xl font-bold mb-3">접근성 코드 모음</h1>
-            <p className="text-lg mb-6 max-w-2xl mx-auto">전 세계 개발자들이 공유한 코드 스니펫을 만들고, 발견하고, 배워보세요.</p>
+            <p className="text-lg mb-6 max-w-2xl mx-auto">접근성 구현 코드를 배워 보세요.</p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button
                 onClick={() => setCreateDialogOpen(true)}
@@ -57,13 +74,6 @@ export default function HomePage() {
                 size="lg"
               >
                 스니펫 생성
-              </Button>
-              <Button
-                variant="outline"
-                className="px-6 py-3 bg-indigo-700 text-white font-medium rounded-md hover:bg-indigo-800 shadow-md transition"
-                size="lg"
-              >
-                스니펫 탐색
               </Button>
             </div>
           </section>
@@ -79,7 +89,24 @@ export default function HomePage() {
                   <SelectValue placeholder="언어 선택" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LANGUAGES.map((lang) => (
+                  <SelectItem value="all">모든 언어</SelectItem>
+                  
+                  <div className="px-2 py-1.5 text-xs font-semibold">웹</div>
+                  {CATEGORIES.web.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                  
+                  <div className="px-2 py-1.5 text-xs font-semibold mt-1">iOS</div>
+                  {CATEGORIES.ios.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                  
+                  <div className="px-2 py-1.5 text-xs font-semibold mt-1">Android</div>
+                  {CATEGORIES.android.map((lang) => (
                     <SelectItem key={lang.value} value={lang.value}>
                       {lang.label}
                     </SelectItem>

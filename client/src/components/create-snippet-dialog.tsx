@@ -13,7 +13,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 
-// Category-specific languages for syntax highlighting
+// 카테고리별 언어 분류
 const CATEGORY_LANGUAGES = {
   // 웹 카테고리 언어
   web: [
@@ -21,36 +21,24 @@ const CATEGORY_LANGUAGES = {
     { value: "typescript", label: "TypeScript" },
     { value: "jsx", label: "JSX" },
     { value: "tsx", label: "TSX" },
+    { value: "html", label: "HTML" },
     { value: "css", label: "CSS" },
     { value: "scss", label: "SCSS" },
-    { value: "html", label: "HTML" },
-    { value: "markup", label: "Markup/HTML" },
-    { value: "react", label: "React" },
-    { value: "vue", label: "Vue.js" },
-    { value: "angular", label: "Angular" },
-    { value: "nextjs", label: "Next.js" },
-    { value: "svelte", label: "Svelte" },
-    { value: "wai-aria", label: "WAI-ARIA" },
   ],
   
   // iOS 카테고리 언어
   ios: [
     { value: "swift", label: "Swift" },
     { value: "swiftui", label: "SwiftUI" },
-    { value: "uikit", label: "UIKit" },
-    { value: "objectivec", label: "Objective-C" },
-    { value: "accessibility", label: "Accessibility API" },
-    { value: "voiceover", label: "VoiceOver" },
+    { value: "objective-c", label: "Objective-C" },
   ],
   
   // Android 카테고리 언어
   android: [
     { value: "kotlin", label: "Kotlin" },
     { value: "java", label: "Java" },
+    { value: "jetpack-compose", label: "Jetpack Compose" },
     { value: "xml", label: "XML" },
-    { value: "jetpackcompose", label: "Jetpack Compose" },
-    { value: "viewbinding", label: "View Binding" },
-    { value: "talkback", label: "TalkBack" },
   ]
 };
 
