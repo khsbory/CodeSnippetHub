@@ -10,14 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookmarkIcon, Heart, Share2, ArrowLeft, Eye } from "lucide-react";
+import { Share2, ArrowLeft, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { SnippetWithUser } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
-import { cn } from "@/lib/utils";
 
 export default function SnippetDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,56 +28,7 @@ export default function SnippetDetailPage() {
     queryKey: [`/api/snippets/${snippetId}`],
   });
 
-  // Fetch like count and user's like status
-  const { data: likeData } = useQuery<{ count: number; userLiked: boolean }>({
-    queryKey: [`/api/snippets/${snippetId}/likes`],
-    enabled: !!snippetId,
-  });
-
-  // Fetch bookmark status
-  const { data: bookmarkData } = useQuery<{ bookmarked: boolean }>({
-    queryKey: [`/api/snippets/${snippetId}/bookmark`],
-    enabled: !!snippetId && !!user,
-  });
-
-  // Like/unlike mutation
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to like snippets",
-          variant: "destructive",
-        });
-        return;
-      }
-      const res = await apiRequest("POST", `/api/snippets/${snippetId}/like`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/snippets/${snippetId}/likes`] });
-    },
-  });
-
-  // Bookmark/unbookmark mutation
-  const bookmarkMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to bookmark snippets",
-          variant: "destructive",
-        });
-        return;
-      }
-      const res = await apiRequest("POST", `/api/snippets/${snippetId}/bookmark`);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/snippets/${snippetId}/bookmark`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/bookmarks"] });
-    },
-  });
+  // 좋아요와 북마크 기능 제거
 
   // Share snippet
   const shareSnippet = async () => {
@@ -121,7 +69,7 @@ export default function SnippetDetailPage() {
             <Button 
               variant="ghost" 
               className="mb-6"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/')}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -172,7 +120,7 @@ export default function SnippetDetailPage() {
           <Button 
             variant="ghost" 
             className="mb-6"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -186,16 +134,18 @@ export default function SnippetDetailPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={snippet.user.avatar} alt={snippet.user.username} />
-                <AvatarFallback>{snippet.user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={snippet.user?.avatar || undefined} alt={snippet.user?.username || '사용자'} />
+                <AvatarFallback>
+                  {snippet.user?.username ? snippet.user.username.substring(0, 2).toUpperCase() : 'UN'}
+                </AvatarFallback>
               </Avatar>
               <div>
                 <Button 
                   variant="link" 
                   className="p-0 h-auto font-medium text-foreground"
-                  onClick={() => navigate(`/users/${snippet.user.id}`)}
+                  onClick={() => navigate(`/users/${snippet.user?.id || ''}`)}
                 >
-                  {snippet.user.username}
+                  {snippet.user?.username || '사용자'}
                 </Button>
                 <p className="text-xs text-muted-foreground">{formattedDate}</p>
               </div>
@@ -225,39 +175,6 @@ export default function SnippetDetailPage() {
           </Card>
           
           <div className="flex gap-2 mb-8">
-            <Button
-              variant="outline"
-              className={cn(
-                "flex items-center gap-2",
-                likeData?.userLiked && "text-primary border-primary"
-              )}
-              onClick={() => likeMutation.mutate()}
-              disabled={likeMutation.isPending}
-            >
-              <Heart className={cn(
-                "h-4 w-4",
-                likeData?.userLiked && "fill-primary"
-              )} />
-              Like
-              {likeData?.count ? ` (${likeData.count})` : ""}
-            </Button>
-            
-            <Button
-              variant="outline"
-              className={cn(
-                "flex items-center gap-2",
-                bookmarkData?.bookmarked && "text-primary border-primary"
-              )}
-              onClick={() => bookmarkMutation.mutate()}
-              disabled={bookmarkMutation.isPending}
-            >
-              <BookmarkIcon className={cn(
-                "h-4 w-4",
-                bookmarkData?.bookmarked && "fill-primary"
-              )} />
-              Bookmark
-            </Button>
-            
             <Button
               variant="outline"
               className="flex items-center gap-2"
