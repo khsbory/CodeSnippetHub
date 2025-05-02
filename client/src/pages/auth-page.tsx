@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { useAuth } from "@/hooks/use-auth";
-import { Github, Twitter, Loader2, Code, Mail, LockKeyhole, User, AlertCircle, ArrowLeft } from "lucide-react";
+import { Loader2, Code, Mail, LockKeyhole, User, AlertCircle, ArrowLeft } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { loginSchema as apiLoginSchema } from "@shared/schema";
@@ -393,27 +393,7 @@ export default function AuthPage() {
                           </Button>
                         </div>
                       
-                        <div className="relative mt-6">
-                          <div className="absolute inset-0 flex items-center">
-                            <Separator className="w-full" />
-                          </div>
-                          <div className="relative flex justify-center text-xs">
-                            <span className="bg-background px-2 text-muted-foreground">
-                              소셜 계정으로 로그인
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                          <Button variant="outline" type="button">
-                            <Github className="mr-2 h-4 w-4" />
-                            깃허브
-                          </Button>
-                          <Button variant="outline" type="button">
-                            <Twitter className="mr-2 h-4 w-4" />
-                            트위터
-                          </Button>
-                        </div>
+
                       </CardContent>
                     </Card>
                   )}
@@ -565,27 +545,7 @@ export default function AuthPage() {
                         </form>
                       </Form>
                       
-                      <div className="relative mt-6">
-                        <div className="absolute inset-0 flex items-center">
-                          <Separator className="w-full" />
-                        </div>
-                        <div className="relative flex justify-center text-xs">
-                          <span className="bg-background px-2 text-muted-foreground">
-                            소셜 계정으로 가입
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 mt-6">
-                        <Button variant="outline" type="button">
-                          <Github className="mr-2 h-4 w-4" />
-                          깃허브
-                        </Button>
-                        <Button variant="outline" type="button">
-                          <Twitter className="mr-2 h-4 w-4" />
-                          트위터
-                        </Button>
-                      </div>
+
                     </CardContent>
                   </Card>
                   )}
