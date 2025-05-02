@@ -13,27 +13,46 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 
-// Languages supported for syntax highlighting
-const LANGUAGES = [
-  { value: "javascript", label: "JavaScript" },
-  { value: "typescript", label: "TypeScript" },
-  { value: "jsx", label: "JSX" },
-  { value: "tsx", label: "TSX" },
-  { value: "css", label: "CSS" },
-  { value: "scss", label: "SCSS" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
-  { value: "csharp", label: "C#" },
-  { value: "go", label: "Go" },
-  { value: "ruby", label: "Ruby" },
-  { value: "rust", label: "Rust" },
-  { value: "kotlin", label: "Kotlin" },
-  { value: "swift", label: "Swift" },
-  { value: "php", label: "PHP" },
-  { value: "markup", label: "HTML" },
-  { value: "sql", label: "SQL" },
-  { value: "bash", label: "Bash" },
-];
+// Category-specific languages for syntax highlighting
+const CATEGORY_LANGUAGES = {
+  // 웹 카테고리 언어
+  web: [
+    { value: "javascript", label: "JavaScript" },
+    { value: "typescript", label: "TypeScript" },
+    { value: "jsx", label: "JSX" },
+    { value: "tsx", label: "TSX" },
+    { value: "css", label: "CSS" },
+    { value: "scss", label: "SCSS" },
+    { value: "html", label: "HTML" },
+    { value: "markup", label: "Markup/HTML" },
+    { value: "react", label: "React" },
+    { value: "vue", label: "Vue.js" },
+    { value: "angular", label: "Angular" },
+    { value: "nextjs", label: "Next.js" },
+    { value: "svelte", label: "Svelte" },
+    { value: "wai-aria", label: "WAI-ARIA" },
+  ],
+  
+  // iOS 카테고리 언어
+  ios: [
+    { value: "swift", label: "Swift" },
+    { value: "swiftui", label: "SwiftUI" },
+    { value: "uikit", label: "UIKit" },
+    { value: "objectivec", label: "Objective-C" },
+    { value: "accessibility", label: "Accessibility API" },
+    { value: "voiceover", label: "VoiceOver" },
+  ],
+  
+  // Android 카테고리 언어
+  android: [
+    { value: "kotlin", label: "Kotlin" },
+    { value: "java", label: "Java" },
+    { value: "xml", label: "XML" },
+    { value: "jetpackcompose", label: "Jetpack Compose" },
+    { value: "viewbinding", label: "View Binding" },
+    { value: "talkback", label: "TalkBack" },
+  ]
+};
 
 // 카테고리 목록 정의
 const CATEGORIES = [
@@ -63,6 +82,7 @@ interface CreateSnippetDialogProps {
 export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web" }: CreateSnippetDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [selectedCategory, setSelectedCategory] = useState<string>(defaultCategory);
   
   // Initialize form with default values
   const form = useForm<CreateSnippetFormValues>({
@@ -70,7 +90,9 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
     defaultValues: {
       title: "",
       description: "",
-      language: "javascript",
+      language: selectedCategory === "web" ? "javascript" : 
+                selectedCategory === "ios" ? "swift" : 
+                selectedCategory === "android" ? "kotlin" : "javascript",
       category: defaultCategory,
       code: "",
       tags: "",
@@ -156,7 +178,18 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
                 <FormItem>
                   <FormLabel>카테고리</FormLabel>
                   <Select 
-                    onValueChange={field.onChange} 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setSelectedCategory(value);
+                      
+                      // 카테고리 변경 시 해당 카테고리의 첫 번째 언어로 기본값 설정
+                      const defaultLanguage = 
+                        value === 'web' ? 'javascript' :
+                        value === 'ios' ? 'swift' :
+                        value === 'android' ? 'kotlin' : 'javascript';
+                      
+                      form.setValue('language', defaultLanguage);
+                    }} 
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -193,7 +226,11 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent position="popper" sideOffset={8}>
-                      {LANGUAGES.map((language) => (
+                      {CATEGORY_LANGUAGES[selectedCategory as keyof typeof CATEGORY_LANGUAGES]?.map((language: {value: string, label: string}) => (
+                        <SelectItem key={language.value} value={language.value}>
+                          {language.label}
+                        </SelectItem>
+                      )) || CATEGORY_LANGUAGES.web.map((language: {value: string, label: string}) => (
                         <SelectItem key={language.value} value={language.value}>
                           {language.label}
                         </SelectItem>
