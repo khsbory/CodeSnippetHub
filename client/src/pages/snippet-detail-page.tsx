@@ -170,6 +170,7 @@ export default function SnippetDetailPage() {
                 showLanguageBadge={false}
                 showLineNumbers={true}
                 maxHeight="none"
+                title={snippet.title}
               />
             </CardContent>
           </Card>

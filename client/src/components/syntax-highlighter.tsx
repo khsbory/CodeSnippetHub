@@ -57,6 +57,7 @@ interface SyntaxHighlighterProps {
   maxHeight?: string;
   showLanguageBadge?: boolean;
   showCopyButton?: boolean;
+  title?: string;
 }
 
 export function SyntaxHighlighter({
@@ -66,6 +67,7 @@ export function SyntaxHighlighter({
   maxHeight = "200px",
   showLanguageBadge = true,
   showCopyButton = true,
+  title,
 }: SyntaxHighlighterProps) {
   const { theme } = useTheme();
   const [isCopied, setIsCopied] = useState(false);
@@ -119,6 +121,7 @@ export function SyntaxHighlighter({
             className="h-6 w-6 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-md"
             onClick={copyToClipboard}
             aria-label="코드 복사"
+            title={title ? `${title} 코드 복사하기` : "코드 복사하기"}
           >
             {isCopied ? (
               <Check className="h-3.5 w-3.5" />
