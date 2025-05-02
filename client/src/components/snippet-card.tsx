@@ -38,9 +38,9 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
         </div>
         
         <Link href={`/snippets/${snippet.id}`}>
-          <h3 className="text-lg font-semibold mb-1 truncate hover:text-primary cursor-pointer">
+          <h2 className="text-lg font-semibold mb-1 truncate hover:text-primary cursor-pointer">
             {snippet.title}
-          </h3>
+          </h2>
         </Link>
         
         <p className="text-sm text-muted-foreground line-clamp-2">
