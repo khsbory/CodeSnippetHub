@@ -157,7 +157,8 @@ export default function AuthPage() {
                                     <Input id="login-email" 
                                       placeholder="example@email.com" 
                                       type="email" 
-                                      className="pl-10" 
+                                      className="pl-10"
+                                      autoFocus
                                       {...field} 
                                     />
                                   </div>
@@ -304,7 +305,8 @@ export default function AuthPage() {
                                     <Input id="register-email" 
                                       placeholder="example@email.com" 
                                       type="email" 
-                                      className="pl-10" 
+                                      className="pl-10"
+                                      autoFocus
                                       {...field} 
                                     />
                                   </div>

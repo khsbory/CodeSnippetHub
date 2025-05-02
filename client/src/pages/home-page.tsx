@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { SnippetWithUser } from "@shared/schema";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SnippetCard } from "@/components/snippet-card";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
@@ -52,6 +54,8 @@ import { usePageTitle } from "@/lib/usePageTitle";
 export default function HomePage() {
   usePageTitle("홈", "접근성 코드 모음 - 웹, iOS, Android 접근성 구현 코드 모음입니다.");
   
+  const { user } = useAuth();
+  const [, navigate] = useLocation();
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
@@ -79,13 +83,24 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold mb-3">접근성 코드 모음</h1>
             <p className="text-lg mb-6 max-w-2xl mx-auto">접근성 구현 코드를 배워 보세요.</p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button
-                onClick={() => setCreateDialogOpen(true)}
-                className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
-                size="lg"
-              >
-                스니펫 생성
-              </Button>
+              {user && (
+                <Button
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
+                  size="lg"
+                >
+                  스니펫 생성
+                </Button>
+              )}
+              {!user && (
+                <Button
+                  onClick={() => navigate("/auth")}
+                  className="px-6 py-3 bg-white text-indigo-600 font-medium rounded-md hover:bg-gray-100 shadow-md transition"
+                  size="lg"
+                >
+                  로그인하고 코드 공유하기
+                </Button>
+              )}
             </div>
           </section>
 
@@ -146,9 +161,15 @@ export default function HomePage() {
                   ? `${LANGUAGES.find(lang => lang.value === language)?.label} 스니펫이 없습니다. 다른 언어를 시도하거나 첫 번째로 공유해보세요!`
                   : "아직 스니펫이 없습니다. 첫 번째로 코드를 공유해보세요!"}
               </p>
-              <Button onClick={() => setCreateDialogOpen(true)}>
-                스니펫 생성
-              </Button>
+              {user ? (
+                <Button onClick={() => setCreateDialogOpen(true)}>
+                  스니펫 생성
+                </Button>
+              ) : (
+                <Button onClick={() => navigate("/auth")}>
+                  로그인하고 코드 공유하기
+                </Button>
+              )}
             </div>
           )}
 
@@ -181,16 +202,18 @@ export default function HomePage() {
         onOpenChange={setCreateDialogOpen} 
       />
       
-      {/* Mobile create button (fixed) */}
-      <div className="sm:hidden fixed bottom-4 right-4 z-20">
-        <Button
-          onClick={() => setCreateDialogOpen(true)}
-          className="h-14 w-14 rounded-full shadow-lg"
-          size="icon"
-        >
-          <span className="text-xl">+</span>
-        </Button>
-      </div>
+      {/* Mobile create button (fixed) - only for logged-in users */}
+      {user && (
+        <div className="sm:hidden fixed bottom-4 right-4 z-20">
+          <Button
+            onClick={() => setCreateDialogOpen(true)}
+            className="h-14 w-14 rounded-full shadow-lg"
+            size="icon"
+          >
+            <span className="text-xl">+</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
