@@ -1,93 +1,16 @@
-import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { SyntaxHighlighter } from "@/components/syntax-highlighter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookmarkIcon, Heart, MessageSquare, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { MessageSquare, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { SnippetWithUser } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
 
 interface SnippetCardProps {
   snippet: SnippetWithUser;
-  onLike?: () => void;
-  onBookmark?: () => void;
 }
 
 export function SnippetCard({ snippet }: SnippetCardProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  
-  // Load like and bookmark status when user is logged in
-  const loadLikeStatus = async () => {
-    if (user) {
-      const res = await fetch(`/api/snippets/${snippet.id}/likes`);
-      const data = await res.json();
-      setIsLiked(data.userLiked);
-    }
-  };
-  
-  const loadBookmarkStatus = async () => {
-    if (user) {
-      const res = await fetch(`/api/snippets/${snippet.id}/bookmark`);
-      const data = await res.json();
-      setIsBookmarked(data.bookmarked);
-    }
-  };
-  
-  // Load statuses on mount and when user changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    loadLikeStatus();
-    loadBookmarkStatus();
-  }, [user, snippet.id]);
-  
-  // Mutations
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to like snippets",
-          variant: "destructive"
-        });
-        return;
-      }
-      const res = await apiRequest("POST", `/api/snippets/${snippet.id}/like`);
-      return await res.json();
-    },
-    onSuccess: (data) => {
-      setIsLiked(data.liked);
-      queryClient.invalidateQueries({ queryKey: [`/api/snippets/${snippet.id}/likes`] });
-    }
-  });
-  
-  const bookmarkMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please log in to bookmark snippets",
-          variant: "destructive"
-        });
-        return;
-      }
-      const res = await apiRequest("POST", `/api/snippets/${snippet.id}/bookmark`);
-      return await res.json();
-    },
-    onSuccess: (data) => {
-      setIsBookmarked(data.bookmarked);
-      queryClient.invalidateQueries({ queryKey: ["/api/bookmarks"] });
-    }
-  });
-  
   const formattedDate = snippet.createdAt 
     ? formatDistanceToNow(new Date(snippet.createdAt), { addSuffix: true })
     : '';
@@ -104,40 +27,6 @@ export function SnippetCard({ snippet }: SnippetCardProps) {
               <Eye className="h-3.5 w-3.5 mr-1" />
               {snippet.views}
             </span>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => bookmarkMutation.mutate()}
-              disabled={bookmarkMutation.isPending}
-              aria-label={isBookmarked ? "북마크 제거" : "북마크 추가"}
-            >
-              <BookmarkIcon
-                className={cn(
-                  "h-5 w-5",
-                  isBookmarked ? "fill-primary text-primary" : "text-muted-foreground"
-                )}
-                aria-hidden="true"
-              />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => likeMutation.mutate()}
-              disabled={likeMutation.isPending}
-              aria-label={isLiked ? "좋아요 취소" : "좋아요"}
-            >
-              <Heart
-                className={cn(
-                  "h-5 w-5",
-                  isLiked ? "fill-primary text-primary" : "text-muted-foreground"
-                )}
-                aria-hidden="true"
-              />
-            </Button>
           </div>
         </div>
         <Link href={`/snippets/${snippet.id}`}>

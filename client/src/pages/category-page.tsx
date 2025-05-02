@@ -17,21 +17,45 @@ import { Loader2, Search } from "lucide-react";
 import { SnippetWithUser } from "@shared/schema";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
 
-// Languages supported for filtering
-const LANGUAGES = [
-  { value: "all", label: "모든 언어" },
-  { value: "javascript", label: "JavaScript" },
-  { value: "typescript", label: "TypeScript" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
-  { value: "csharp", label: "C#" },
-  { value: "php", label: "PHP" },
-  { value: "swift", label: "Swift" },
-  { value: "kotlin", label: "Kotlin" },
-  { value: "html", label: "HTML" },
-  { value: "css", label: "CSS" },
-  { value: "objectivec", label: "Objective-C" },
-];
+// Category-specific languages for filtering
+const CATEGORY_LANGUAGES = {
+  // 웹 카테고리 언어
+  web: [
+    { value: "all", label: "모든 언어" },
+    { value: "javascript", label: "JavaScript" },
+    { value: "typescript", label: "TypeScript" },
+    { value: "html", label: "HTML" },
+    { value: "css", label: "CSS" },
+    { value: "react", label: "React" },
+    { value: "vue", label: "Vue.js" },
+    { value: "angular", label: "Angular" },
+    { value: "nextjs", label: "Next.js" },
+    { value: "svelte", label: "Svelte" },
+    { value: "wai-aria", label: "WAI-ARIA" },
+  ],
+  
+  // iOS 카테고리 언어
+  ios: [
+    { value: "all", label: "모든 언어" },
+    { value: "swift", label: "Swift" },
+    { value: "swiftui", label: "SwiftUI" },
+    { value: "uikit", label: "UIKit" },
+    { value: "objectivec", label: "Objective-C" },
+    { value: "accessibility", label: "Accessibility API" },
+    { value: "voiceover", label: "VoiceOver" },
+  ],
+  
+  // Android 카테고리 언어
+  android: [
+    { value: "all", label: "모든 언어" },
+    { value: "kotlin", label: "Kotlin" },
+    { value: "java", label: "Java" },
+    { value: "xml", label: "XML" },
+    { value: "jetpackcompose", label: "Jetpack Compose" },
+    { value: "viewbinding", label: "View Binding" },
+    { value: "talkback", label: "TalkBack" },
+  ]
+};
 
 // Category info mapping
 const CATEGORIES = {
@@ -141,7 +165,11 @@ export default function CategoryPage() {
                     <SelectValue placeholder="언어 선택" />
                   </SelectTrigger>
                   <SelectContent>
-                    {LANGUAGES.map((lang) => (
+                    {CATEGORY_LANGUAGES[category as keyof typeof CATEGORY_LANGUAGES]?.map((lang: {value: string, label: string}) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    )) || CATEGORY_LANGUAGES.web.map((lang: {value: string, label: string}) => (
                       <SelectItem key={lang.value} value={lang.value}>
                         {lang.label}
                       </SelectItem>
