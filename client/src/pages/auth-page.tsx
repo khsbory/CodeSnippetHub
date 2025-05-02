@@ -328,19 +328,7 @@ export default function AuthPage() {
                               name="password"
                               render={({ field }) => (
                                 <FormItem>
-                                  <div className="flex items-center justify-between">
-                                    <FormLabel htmlFor="login-password">비밀번호</FormLabel>
-                                    <Button
-                                      variant="link"
-                                      className="px-0 h-auto text-xs font-normal"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        setForgotPasswordMode(true);
-                                      }}
-                                    >
-                                      비밀번호를 잊으셨나요?
-                                    </Button>
-                                  </div>
+                                  <FormLabel htmlFor="login-password">비밀번호</FormLabel>
                                   <FormControl>
                                     <div className="relative">
                                       <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -394,6 +382,16 @@ export default function AuthPage() {
                             </Button>
                           </form>
                         </Form>
+                        
+                        <div className="mt-4 text-center">
+                          <Button
+                            variant="link"
+                            className="text-sm font-normal"
+                            onClick={() => setForgotPasswordMode(true)}
+                          >
+                            비밀번호를 잊으셨나요?
+                          </Button>
+                        </div>
                       
                         <div className="relative mt-6">
                           <div className="absolute inset-0 flex items-center">
