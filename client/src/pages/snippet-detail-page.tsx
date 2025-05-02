@@ -171,20 +171,12 @@ export default function SnippetDetailPage() {
                 showLineNumbers={true}
                 maxHeight="none"
                 title={snippet.title}
+                snippetId={snippetId}
+                showShareButton={true}
+                showCopyButton={true}
               />
             </CardContent>
           </Card>
-          
-          <div className="flex gap-2 mb-8">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              onClick={copyUrl}
-            >
-              <Link className="h-4 w-4" />
-              URL 복사
-            </Button>
-          </div>
         </div>
       </main>
       <Footer />

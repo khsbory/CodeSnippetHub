@@ -139,6 +139,7 @@ export function SyntaxHighlighter({
             className="h-6 w-6 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-md"
             onClick={copyUrlToClipboard}
             aria-label="URL 복사"
+            aria-pressed={isUrlCopied}
             title={title ? `${title} 공유 링크 복사하기` : "공유 링크 복사하기"}
           >
             {isUrlCopied ? (
@@ -155,6 +156,7 @@ export function SyntaxHighlighter({
             className="h-6 w-6 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-md"
             onClick={copyToClipboard}
             aria-label="코드 복사"
+            aria-pressed={isCopied}
             title={title ? `${title} 코드 복사하기` : "코드 복사하기"}
           >
             {isCopied ? (
