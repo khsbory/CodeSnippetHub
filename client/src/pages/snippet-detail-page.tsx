@@ -14,6 +14,7 @@ import { Share2, ArrowLeft, Eye } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { usePageTitle } from "@/lib/usePageTitle";
 import { SnippetWithUser } from "@shared/schema";
 
 export default function SnippetDetailPage() {
@@ -28,8 +29,7 @@ export default function SnippetDetailPage() {
     queryKey: [`/api/snippets/${snippetId}`],
   });
   
-  // Import usePageTitle hook and set page title based on snippet data
-  const { usePageTitle } = require("@/lib/usePageTitle");
+  // Set page title based on snippet data
   usePageTitle(
     snippet ? `${snippet.title}` : '스니펫 상세 보기',
     snippet ? `${snippet.description} - ${snippet.language} 코드 스니펫` : '코드 스니펫 상세 페이지'
