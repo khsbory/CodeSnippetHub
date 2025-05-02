@@ -3,7 +3,6 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
-import { SearchDialog } from "@/components/search-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   DropdownMenu, 
@@ -21,8 +20,7 @@ import {
 } from "@/components/ui/drawer";
 import { useAuth } from "@/hooks/use-auth";
 import { 
-  Code, 
-  Search, 
+  Code,
   Menu, 
   Plus, 
   User, 
@@ -37,7 +35,6 @@ export function Header() {
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [createSnippetOpen, setCreateSnippetOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   
   const navigation = [
     { name: "홈", href: "/" },
@@ -97,17 +94,6 @@ export function Header() {
           </div>
           
           <div className="flex items-center">
-            {/* Search Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSearchOpen(true)}
-              className="text-muted-foreground"
-              aria-label="검색"
-            >
-              <Search className="h-5 w-5" />
-            </Button>
-            
             {/* Dark Mode Toggle */}
             <DarkModeToggle />
             
@@ -263,12 +249,6 @@ export function Header() {
       <CreateSnippetDialog 
         open={createSnippetOpen} 
         onOpenChange={setCreateSnippetOpen} 
-      />
-      
-      {/* Search Dialog */}
-      <SearchDialog 
-        open={searchOpen} 
-        onOpenChange={setSearchOpen} 
       />
     </header>
   );

@@ -1,22 +1,21 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { useParams, useLocation } from "wouter";
+import { useLocation, useParams } from "wouter";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { SnippetCard } from "@/components/snippet-card";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Search } from "lucide-react";
-import { SnippetWithUser } from "@shared/schema";
+import { Loader2 } from "lucide-react";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
 import { useAuth } from "@/hooks/use-auth";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 // Category-specific languages for filtering
 const CATEGORY_LANGUAGES = {
@@ -74,13 +73,10 @@ const CATEGORIES = {
   }
 };
 
-import { usePageTitle } from "@/lib/usePageTitle";
-
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
   const [, navigate] = useLocation();
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState("");
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const PAGE_SIZE = 12;
@@ -133,28 +129,7 @@ export default function CategoryPage() {
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
     initialPageParam: 1,
-    enabled: !searchQuery.trim(), // Don't fetch when searching
   });
-  
-  // Fetch search results when search query changes, specific to this category
-  const { data: searchResults, isLoading: isSearching } = useQuery<SnippetWithUser[]>({
-    queryKey: ["/api/snippets/search", searchQuery, category],
-    queryFn: async ({ queryKey }) => {
-      const [_, query, cat] = queryKey;
-      const response = await fetch(`/api/snippets/search?q=${query}&category=${cat}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch search results');
-      }
-      return response.json();
-    },
-    enabled: !!searchQuery.trim(),
-  });
-  
-  // Handle search submission
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // The search query will trigger the search query automatically
-  };
   
   // All snippets flattened for infinite scroll
   const allSnippets = useMemo(() => {
@@ -163,7 +138,7 @@ export default function CategoryPage() {
   
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
-    if (!searchQuery.trim() && loadMoreRef.current) {
+    if (loadMoreRef.current) {
       observerRef.current = new IntersectionObserver(entries => {
         const [entry] = entries;
         if (entry.isIntersecting && hasNextPage && !isFetching) {
@@ -179,11 +154,7 @@ export default function CategoryPage() {
         observerRef.current.disconnect();
       }
     };
-  }, [loadMoreRef, hasNextPage, isFetching, fetchNextPage, searchQuery]);
-  
-  // Determine which data to display
-  const displaySnippets = searchQuery.trim() ? (searchResults || []) : allSnippets;
-  const isLoadingData = searchQuery.trim() ? isSearching : isLoading;
+  }, [loadMoreRef, hasNextPage, isFetching, fetchNextPage]);
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -196,21 +167,8 @@ export default function CategoryPage() {
             <p className="text-muted-foreground mt-2">{categoryInfo.description}</p>
           </div>
           
-          {/* Search and Filter Section */}
+          {/* Filter Section */}
           <div className="bg-card rounded-lg p-6 border mb-8">
-            <form onSubmit={handleSearch} className="flex gap-2 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                <Input
-                  placeholder="코드 검색..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Button type="submit">검색</Button>
-            </form>
-            
             <div className="flex flex-col sm:flex-row gap-4">              
               <div className="space-y-2">
                 <label className="text-sm font-medium">언어</label>
@@ -247,27 +205,14 @@ export default function CategoryPage() {
             </div>
           </div>
           
-          {/* Search Results Heading */}
-          {searchQuery.trim() && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold">
-                {isSearching 
-                  ? "검색 중..." 
-                  : searchResults?.length 
-                    ? `"${searchQuery}" 검색 결과` 
-                    : `"${searchQuery}"에 대한 결과가 없습니다`}
-              </h2>
-            </div>
-          )}
-          
           {/* Snippets Grid */}
-          {isLoadingData ? (
+          {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
-          ) : displaySnippets && displaySnippets.length > 0 ? (
+          ) : allSnippets.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displaySnippets.map(snippet => (
+              {allSnippets.map(snippet => (
                 <SnippetCard key={snippet.id} snippet={snippet} />
               ))}
             </div>
@@ -275,15 +220,9 @@ export default function CategoryPage() {
             <div className="text-center py-16 bg-muted/30 rounded-lg">
               <h3 className="text-xl font-semibold mb-2">코드를 찾을 수 없습니다</h3>
               <p className="text-muted-foreground mb-6">
-                {searchQuery.trim() 
-                  ? "다른 검색어로 시도하거나 전체 코드를 둘러보세요."
-                  : `${language !== 'all' ? language + ' ' : ''}${category} 카테고리에 코드가 없습니다. 첫 번째로 공유해 보세요!`}
+                {`${language !== 'all' ? language + ' ' : ''}${category} 카테고리에 코드가 없습니다. 첫 번째로 공유해 보세요!`}
               </p>
-              {searchQuery.trim() ? (
-                <Button onClick={() => setSearchQuery("")}>
-                  검색 초기화
-                </Button>
-              ) : user && (
+              {user && (
                 <Button onClick={() => setCreateDialogOpen(true)}>
                   스니펫 생성
                 </Button>
@@ -292,12 +231,12 @@ export default function CategoryPage() {
           )}
           
           {/* 무한 스크롤 감지 영역 */}
-          {!isLoadingData && !searchQuery.trim() && displaySnippets && displaySnippets.length > 0 && (
+          {!isLoading && allSnippets.length > 0 && (
             <div ref={loadMoreRef} className="h-10 w-full mt-8"></div>
           )}
 
           {/* 무한 스크롤용 로딩 인디케이터 */}
-          {isFetching && !isLoading && !searchQuery.trim() && (
+          {isFetching && !isLoading && (
             <div className="mt-8 text-center py-4">
               <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
               <p className="text-sm text-muted-foreground mt-2">스니펫 로딩 중...</p>
