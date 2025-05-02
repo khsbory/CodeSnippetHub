@@ -297,6 +297,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // 사용자 관련 API
+  
+  // 특정 사용자 정보 조회
+  app.get("/api/users/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      }
+      
+      // 민감한 정보 제외
+      const { password, verificationToken, tokenExpiry, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("사용자 정보 조회 오류:", error);
+      res.status(500).json({ message: "사용자 정보를 불러오는 중 오류가 발생했습니다." });
+    }
+  });
+  
+  // 비밀번호 변경
+  app.post("/api/users/password", isAuthenticated, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      // 입력 검증
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "현재 비밀번호와 새 비밀번호가 필요합니다." });
+      }
+      
+      const user = await storage.getUser(req.user!.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      }
+      
+      // 현재 비밀번호 확인
+      const { comparePasswords, hashPassword } = await import("./auth");
+      const isMatch = await comparePasswords(currentPassword, user.password);
+      
+      if (!isMatch) {
+        return res.status(400).json({ message: "현재 비밀번호가 일치하지 않습니다." });
+      }
+      
+      // 새 비밀번호 해싱
+      const hashedPassword = await hashPassword(newPassword);
+      
+      // DB 업데이트
+      await db.update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, req.user!.id));
+      
+      res.json({ message: "비밀번호가 성공적으로 변경되었습니다." });
+    } catch (error) {
+      console.error("비밀번호 변경 오류:", error);
+      res.status(500).json({ message: "비밀번호 변경 중 오류가 발생했습니다." });
+    }
+  });
+  
+  // 회원 탈퇴 (자진 탈퇴)
+  app.delete("/api/users", isAuthenticated, async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      // 입력 검증
+      if (!password) {
+        return res.status(400).json({ message: "비밀번호가 필요합니다." });
+      }
+      
+      const user = await storage.getUser(req.user!.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "사용자를 찾을 수 없습니다." });
+      }
+      
+      // 비밀번호 확인
+      const { comparePasswords } = await import("./auth");
+      const isMatch = await comparePasswords(password, user.password);
+      
+      if (!isMatch) {
+        return res.status(400).json({ message: "비밀번호가 일치하지 않습니다." });
+      }
+      
+      // 관리자는 자신의 계정을 삭제할 수 없음
+      if (user.isAdmin) {
+        return res.status(403).json({ message: "관리자 계정은 삭제할 수 없습니다." });
+      }
+      
+      // 회원 삭제
+      const deleted = await storage.deleteUser(req.user!.id);
+      if (deleted) {
+        // 세션 파기
+        req.logout((err) => {
+          if (err) {
+            console.error("로그아웃 오류:", err);
+          }
+          res.json({ message: "계정이 성공적으로 삭제되었습니다." });
+        });
+      } else {
+        res.status(500).json({ message: "계정 삭제 중 오류가 발생했습니다." });
+      }
+    } catch (error) {
+      console.error("회원 탈퇴 오류:", error);
+      res.status(500).json({ message: "계정 삭제 중 오류가 발생했습니다." });
+    }
+  });
+  
   // 관리자 전용 API 엔드포인트
   
   // 모든 사용자 목록 조회
