@@ -45,12 +45,17 @@ const registerSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
+import { usePageTitle } from "@/lib/usePageTitle";
+
 export default function AuthPage() {
   const { user, loginMutation, registerMutation, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
   const defaultTab = params.get("tab") === "register" ? "register" : "login";
+  
+  // 인증 페이지 타이틀 설정
+  usePageTitle("로그인 / 가입", "접근성 코드 모음 - 사용자 인증 페이지");
   
   // 인증 이메일 발송 상태 관리
   const [verificationSent, setVerificationSent] = useState(false);

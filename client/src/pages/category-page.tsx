@@ -73,11 +73,28 @@ const CATEGORIES = {
   }
 };
 
+import { usePageTitle } from "@/lib/usePageTitle";
+
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
   const [searchQuery, setSearchQuery] = useState("");
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  
+  // 카테고리에 따라 타이틀 동적 설정
+  const categoryTitle = {
+    'web': '웹 접근성 코드',
+    'ios': 'iOS 접근성 코드',
+    'android': 'Android 접근성 코드',
+  }[category as string] || `${category} 코드`;
+  
+  const categoryDescription = {
+    'web': '웹 접근성을 향상시키는 HTML, CSS, JavaScript 코드 모음입니다.',
+    'ios': 'iOS 앱의 접근성을 향상시키는 Swift 코드 모음입니다.',
+    'android': 'Android 앱의 접근성을 향상시키는 Kotlin과 Java 코드 모음입니다.',
+  }[category as string] || `${category} 관련 코드 모음입니다.`;
+  
+  usePageTitle(categoryTitle, categoryDescription);
   
   // Determine category display info
   const categoryInfo = CATEGORIES[category as keyof typeof CATEGORIES] || {

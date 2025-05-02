@@ -47,7 +47,11 @@ const LANGUAGES = [
   ...CATEGORIES.android,
 ];
 
+import { usePageTitle } from "@/lib/usePageTitle";
+
 export default function HomePage() {
+  usePageTitle("홈", "접근성 코드 모음 - 웹, iOS, Android 접근성 구현 코드 모음입니다.");
+  
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   

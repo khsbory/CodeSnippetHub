@@ -27,6 +27,13 @@ export default function SnippetDetailPage() {
   const { data: snippet, isLoading, error } = useQuery<SnippetWithUser>({
     queryKey: [`/api/snippets/${snippetId}`],
   });
+  
+  // Import usePageTitle hook and set page title based on snippet data
+  const { usePageTitle } = require("@/lib/usePageTitle");
+  usePageTitle(
+    snippet ? `${snippet.title}` : '스니펫 상세 보기',
+    snippet ? `${snippet.description} - ${snippet.language} 코드 스니펫` : '코드 스니펫 상세 페이지'
+  );
 
   // 좋아요와 북마크 기능 제거
 
