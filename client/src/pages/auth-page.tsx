@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useRoute, useSearch } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -17,6 +17,7 @@ import { Github, Twitter, Loader2, Code, Mail, LockKeyhole, User, AlertCircle, A
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { loginSchema as apiLoginSchema } from "@shared/schema";
+import { usePageTitle } from "@/lib/usePageTitle";
 
 // 클라이언트용 로그인 스키마 (rememberMe 옵션 추가)
 const loginSchema = apiLoginSchema.extend({
@@ -40,10 +41,15 @@ const registerSchema = z.object({
   path: ["confirmPassword"]
 });
 
+// 비밀번호 찾기 스키마
+const forgotPasswordSchema = z.object({
+  email: z.string()
+    .email("유효한 이메일 주소를 입력해주세요")
+});
+
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
-
-import { usePageTitle } from "@/lib/usePageTitle";
+type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation, isLoading } = useAuth();
@@ -51,6 +57,7 @@ export default function AuthPage() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const defaultTab = params.get("tab") === "register" ? "register" : "login";
+  const { toast } = useToast();
   
   // 인증 페이지 타이틀 설정
   usePageTitle("로그인 / 가입", "접근성 코드 모음 - 사용자 인증 페이지");
@@ -60,7 +67,16 @@ export default function AuthPage() {
   
   // 비밀번호 찾기 모드
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  
+  // 비밀번호 찾기 폼
+  const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -109,6 +125,47 @@ export default function AuthPage() {
       }
     });
   };
+  
+  // 비밀번호 재설정 이메일 발송
+  const onForgotPasswordSubmit = async (values: ForgotPasswordFormValues) => {
+    try {
+      setResetPasswordLoading(true);
+      // 실제로는 서버 API 호출이 필요합니다.
+      // API가 준비되면 아래 주석을 해제하세요
+      /*
+      const response = await fetch('/api/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('비밀번호 재설정 이메일 발송에 실패했습니다');
+      }
+      */
+      
+      // 테스트를 위해 타이머 추가
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 성공 상태로 전환
+      setResetEmailSent(true);
+      
+      toast({
+        title: "이메일 발송 완료",
+        description: "비밀번호 재설정 링크가 이메일로 발송되었습니다.",
+      });
+    } catch (error) {
+      toast({
+        title: "오류 발생",
+        description: error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setResetPasswordLoading(false);
+    }
+  };
 
   // 로딩 중에는 로딩 UI 표시
   if (isLoading) {
@@ -136,121 +193,232 @@ export default function AuthPage() {
                 
                 {/* Login Tab */}
                 <TabsContent value="login">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>계정 로그인</CardTitle>
-                      <CardDescription>
-                        코드 스니펫을 공유하고 탐색할 수 있는 커뮤니티에 로그인하세요
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Form {...loginForm}>
-                        <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                          <FormField
-                            control={loginForm.control}
-                            name="email"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel htmlFor="login-email">이메일</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="login-email" 
-                                      placeholder="example@email.com" 
-                                      type="email" 
-                                      className="pl-10"
-                                      autoFocus
-                                      {...field} 
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={loginForm.control}
-                            name="password"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel htmlFor="login-password">비밀번호</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="login-password" 
-                                      type="password" 
-                                      placeholder="••••••••" 
-                                      className="pl-10"
-                                      {...field} 
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
+                  {forgotPasswordMode ? (
+                    <Card>
+                      {resetEmailSent ? (
+                        <>
+                          <CardHeader>
+                            <CardTitle>이메일 발송 완료</CardTitle>
+                            <CardDescription>
+                              비밀번호 재설정 링크가 이메일로 발송되었습니다
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <Alert className="bg-green-50 border-green-200">
+                              <AlertCircle className="h-4 w-4 text-green-600" />
+                              <AlertDescription className="text-green-700">
+                                이메일에 포함된 링크를 클릭해 비밀번호를 재설정해주세요.
+                              </AlertDescription>
+                            </Alert>
+                            <p className="text-sm text-muted-foreground">
+                              이메일이 도착하지 않았나요? 스팸 폴더를 확인하거나 잠시 후 다시 시도해주세요.
+                            </p>
+                            <Button 
+                              variant="outline" 
+                              className="w-full"
+                              onClick={() => {
+                                setForgotPasswordMode(false);
+                                setResetEmailSent(false);
+                              }}
+                            >
+                              로그인 페이지로 돌아가기
+                            </Button>
+                          </CardContent>
+                        </>
+                      ) : (
+                        <>
+                          <CardHeader>
+                            <div className="flex items-center mb-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 mr-2"
+                                onClick={() => setForgotPasswordMode(false)}
+                              >
+                                <ArrowLeft className="h-4 w-4" />
+                                <span className="sr-only">뒤로가기</span>
+                              </Button>
+                              <CardTitle>비밀번호 찾기</CardTitle>
+                            </div>
+                            <CardDescription>
+                              가입한 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <Form {...forgotPasswordForm}>
+                              <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPasswordSubmit)} className="space-y-4">
+                                <FormField
+                                  control={forgotPasswordForm.control}
+                                  name="email"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel htmlFor="forgot-email">이메일</FormLabel>
+                                      <FormControl>
+                                        <div className="relative">
+                                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                          <Input id="forgot-email" 
+                                            placeholder="example@email.com" 
+                                            type="email" 
+                                            className="pl-10"
+                                            autoFocus
+                                            {...field} 
+                                          />
+                                        </div>
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                
+                                <Button 
+                                  type="submit" 
+                                  className="w-full"
+                                  disabled={resetPasswordLoading}
+                                >
+                                  {resetPasswordLoading ? (
+                                    <>
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                      이메일 발송 중...
+                                    </>
+                                  ) : (
+                                    "비밀번호 재설정 링크 받기"
+                                  )}
+                                </Button>
+                              </form>
+                            </Form>
+                          </CardContent>
+                        </>
+                      )}
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>계정 로그인</CardTitle>
+                        <CardDescription>
+                          코드 스니펫을 공유하고 탐색할 수 있는 커뮤니티에 로그인하세요
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Form {...loginForm}>
+                          <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                            <FormField
                               control={loginForm.control}
-                              name="rememberMe"
+                              name="email"
                               render={({ field }) => (
-                                <FormItem className="flex items-start space-x-2 mt-4">
+                                <FormItem>
+                                  <FormLabel htmlFor="login-email">이메일</FormLabel>
                                   <FormControl>
-                                    <Checkbox
-                                      id="rememberMe"
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                    />
+                                    <div className="relative">
+                                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                      <Input id="login-email" 
+                                        placeholder="example@email.com" 
+                                        type="email" 
+                                        className="pl-10"
+                                        autoFocus
+                                        {...field} 
+                                      />
+                                    </div>
                                   </FormControl>
-                                  <div className="space-y-1 leading-none">
-                                    <FormLabel htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
-                                      자동 로그인
-                                    </FormLabel>
-                                  </div>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
-                          
-                          <Button 
-                            type="submit" 
-                            className="w-full"
-                            disabled={loginMutation.isPending}
-                          >
-                            {loginMutation.isPending ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                로그인 중...
-                              </>
-                            ) : (
-                              "로그인"
-                            )}
+                            <FormField
+                              control={loginForm.control}
+                              name="password"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <div className="flex items-center justify-between">
+                                    <FormLabel htmlFor="login-password">비밀번호</FormLabel>
+                                    <Button
+                                      variant="link"
+                                      className="px-0 h-auto text-xs font-normal"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setForgotPasswordMode(true);
+                                      }}
+                                    >
+                                      비밀번호를 잊으셨나요?
+                                    </Button>
+                                  </div>
+                                  <FormControl>
+                                    <div className="relative">
+                                      <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                      <Input id="login-password" 
+                                        type="password" 
+                                        placeholder="••••••••" 
+                                        className="pl-10"
+                                        {...field} 
+                                      />
+                                    </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            
+                            <FormField
+                                control={loginForm.control}
+                                name="rememberMe"
+                                render={({ field }) => (
+                                  <FormItem className="flex items-start space-x-2 mt-4">
+                                    <FormControl>
+                                      <Checkbox
+                                        id="rememberMe"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                      <FormLabel htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                                        자동 로그인
+                                      </FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            
+                            <Button 
+                              type="submit" 
+                              className="w-full"
+                              disabled={loginMutation.isPending}
+                            >
+                              {loginMutation.isPending ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  로그인 중...
+                                </>
+                              ) : (
+                                "로그인"
+                              )}
+                            </Button>
+                          </form>
+                        </Form>
+                      
+                        <div className="relative mt-6">
+                          <div className="absolute inset-0 flex items-center">
+                            <Separator className="w-full" />
+                          </div>
+                          <div className="relative flex justify-center text-xs">
+                            <span className="bg-background px-2 text-muted-foreground">
+                              소셜 계정으로 로그인
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mt-6">
+                          <Button variant="outline" type="button">
+                            <Github className="mr-2 h-4 w-4" />
+                            깃허브
                           </Button>
-                        </form>
-                      </Form>
-                      
-                      <div className="relative mt-6">
-                        <div className="absolute inset-0 flex items-center">
-                          <Separator className="w-full" />
+                          <Button variant="outline" type="button">
+                            <Twitter className="mr-2 h-4 w-4" />
+                            트위터
+                          </Button>
                         </div>
-                        <div className="relative flex justify-center text-xs">
-                          <span className="bg-background px-2 text-muted-foreground">
-                            소셜 계정으로 로그인
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 mt-6">
-                        <Button variant="outline" type="button">
-                          <Github className="mr-2 h-4 w-4" />
-                          깃허브
-                        </Button>
-                        <Button variant="outline" type="button">
-                          <Twitter className="mr-2 h-4 w-4" />
-                          트위터
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  )}
                 </TabsContent>
                 
                 {/* Register Tab */}
@@ -322,14 +490,13 @@ export default function AuthPage() {
                             name="fullName"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel htmlFor="register-fullName">성명</FormLabel>
+                                <FormLabel htmlFor="register-name">이름</FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <User aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="register-fullName" 
+                                    <Input id="register-name" 
                                       placeholder="홍길동" 
-                                      type="text" 
-                                      className="pl-10" 
+                                      className="pl-10"
                                       {...field} 
                                     />
                                   </div>
@@ -338,6 +505,7 @@ export default function AuthPage() {
                               </FormItem>
                             )}
                           />
+                          
                           <FormField
                             control={registerForm.control}
                             name="password"
@@ -359,16 +527,17 @@ export default function AuthPage() {
                               </FormItem>
                             )}
                           />
+                          
                           <FormField
                             control={registerForm.control}
                             name="confirmPassword"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel htmlFor="register-passwordConfirm">비밀번호 확인</FormLabel>
+                                <FormLabel htmlFor="register-confirm-password">비밀번호 확인</FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <LockKeyhole aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="register-passwordConfirm" 
+                                    <Input id="register-confirm-password" 
                                       type="password" 
                                       placeholder="••••••••" 
                                       className="pl-10"
