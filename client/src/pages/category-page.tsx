@@ -236,17 +236,11 @@ export default function CategoryPage() {
               </div>
               
               <div className="ml-auto self-end">
-                {user ? (
+                {user && (
                   <Button
                     onClick={() => setCreateDialogOpen(true)}
                   >
-                    코드 공유하기
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => navigate("/auth")}
-                  >
-                    코드 공유하기
+                    스니펫 생성
                   </Button>
                 )}
               </div>
@@ -289,13 +283,9 @@ export default function CategoryPage() {
                 <Button onClick={() => setSearchQuery("")}>
                   검색 초기화
                 </Button>
-              ) : user ? (
+              ) : user && (
                 <Button onClick={() => setCreateDialogOpen(true)}>
-                  코드 공유하기
-                </Button>
-              ) : (
-                <Button onClick={() => navigate("/auth")}>
-                  코드 공유하기
+                  스니펫 생성
                 </Button>
               )}
             </div>

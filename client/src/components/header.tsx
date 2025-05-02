@@ -240,7 +240,7 @@ export function Header() {
                       </DrawerClose>
                     )}
                     
-                    {user ? (
+                    {user && (
                       <Button
                         onClick={() => {
                           setMobileMenuOpen(false);
@@ -250,15 +250,6 @@ export function Header() {
                       >
                         <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
                       </Button>
-                    ) : (
-                      <DrawerClose asChild>
-                        <Button
-                          onClick={() => setLocation('/auth')}
-                          className="mt-3 w-full justify-center"
-                        >
-                          <User className="h-4 w-4 mr-1" /> 코드 공유하기
-                        </Button>
-                      </DrawerClose>
                     )}
                   </nav>
                 </div>
