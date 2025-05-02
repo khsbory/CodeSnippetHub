@@ -48,7 +48,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {/* Hero section */}
           <section className="mb-8 text-center py-8 px-4 sm:px-6 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-            <h1 className="text-3xl font-bold mb-3">전 세계와 코드 스니펫 공유하기</h1>
+            <h1 className="text-3xl font-bold mb-3">접근성 코드 모음</h1>
             <p className="text-lg mb-6 max-w-2xl mx-auto">전 세계 개발자들이 공유한 코드 스니펫을 만들고, 발견하고, 배워보세요.</p>
             <div className="flex flex-wrap justify-center gap-4">
               <Button
@@ -68,32 +68,8 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Filter and language selection */}
-          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                onClick={() => setFilter("latest")}
-                variant={filter === "latest" ? "default" : "outline"}
-                className="px-4 py-2 rounded-md"
-              >
-                최신
-              </Button>
-              <Button
-                onClick={() => setFilter("popular")}
-                variant={filter === "popular" ? "default" : "outline"}
-                className="px-4 py-2 rounded-md"
-              >
-                인기
-              </Button>
-              <Button
-                onClick={() => setFilter("trending")}
-                variant={filter === "trending" ? "default" : "outline"}
-                className="px-4 py-2 rounded-md"
-              >
-                트렌딩
-              </Button>
-            </div>
-            
+          {/* Language selection */}
+          <div className="mb-6 flex justify-end">
             <div className="relative">
               <Select
                 value={language}

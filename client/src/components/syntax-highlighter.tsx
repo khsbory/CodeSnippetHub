@@ -84,13 +84,20 @@ export function SyntaxHighlighter({
   const displayLanguage = languageNames[normalizedLanguage] || language;
   const badgeColor = languageColors[normalizedLanguage] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
   
-  // 코드 줄 번호 생성 함수
-  const generateLineNumbers = () => {
+  // 코드 줄 번호와 코드를 함께 표시하기 위한 함수
+  const generateCode = () => {
     const lines = code.split('\n');
     return (
-      <div className="select-none text-right pr-3 text-muted-foreground">
-        {lines.map((_, i) => (
-          <div key={i}>{i + 1}</div>
+      <div className="w-full">
+        {lines.map((line, i) => (
+          <div key={i} className="flex">
+            <div className="select-none pr-4 text-right min-w-[3rem] text-muted-foreground">
+              {i + 1}
+            </div>
+            <div className="whitespace-pre">
+              {line}
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -127,13 +134,16 @@ export function SyntaxHighlighter({
         className="bg-muted dark:bg-muted/70 font-mono text-sm overflow-x-auto text-foreground"
         style={{ maxHeight }}
       >
-        <div className="flex p-4">
-          {showLineNumbers && generateLineNumbers()}
-          <pre className="whitespace-pre overflow-x-auto flex-1">
-            <code>
-              {code}
-            </code>
-          </pre>
+        <div className="p-4">
+          {showLineNumbers ? (
+            generateCode()
+          ) : (
+            <pre className="whitespace-pre overflow-x-auto">
+              <code>
+                {code}
+              </code>
+            </pre>
+          )}
         </div>
       </div>
     </div>
