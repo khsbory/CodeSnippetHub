@@ -38,7 +38,7 @@ export interface IStorage {
   deleteUser(userId: number): Promise<boolean>;
   
   // Snippet methods
-  getSnippets(limit?: number, filter?: string, language?: string, category?: string): Promise<SnippetWithUser[]>;
+  getSnippets(limit?: number, filter?: string, language?: string, category?: string, page?: number): Promise<SnippetWithUser[]>;
   getSnippetById(id: number): Promise<SnippetWithUser | undefined>;
   getSnippetsByUserId(userId: number): Promise<SnippetWithUser[]>;
   createSnippet(snippet: InsertSnippet): Promise<Snippet>;
@@ -207,7 +207,7 @@ export class MemStorage implements IStorage {
   }
   
   // Snippet methods
-  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all', category: string = 'all'): Promise<SnippetWithUser[]> {
+  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all', category: string = 'all', page: number = 1): Promise<SnippetWithUser[]> {
     let snippets = Array.from(this.snippets.values());
     
     // Apply language filter if not 'all'
@@ -245,8 +245,12 @@ export class MemStorage implements IStorage {
         break;
     }
     
-    // Limit the number of results
-    snippets = snippets.slice(0, limit);
+    // Calculate pagination (page is 1-based)
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    // Apply pagination
+    snippets = snippets.slice(startIndex, endIndex);
     
     // Combine with user data
     const snippetsWithUser = await Promise.all(
@@ -609,7 +613,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Snippet methods
-  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all', category: string = 'all'): Promise<SnippetWithUser[]> {
+  async getSnippets(limit: number = 20, filter: string = 'latest', language: string = 'all', category: string = 'all', page: number = 1): Promise<SnippetWithUser[]> {
     let query = db.select({
       snippet: snippets,
       user: users
@@ -646,8 +650,11 @@ export class DatabaseStorage implements IStorage {
       query = query.orderBy(desc(snippets.createdAt));
     }
     
-    // Limit results
-    query = query.limit(limit);
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit;
+    
+    // Apply pagination using offset and limit
+    query = query.offset(offset).limit(limit);
     
     const results = await query;
     
