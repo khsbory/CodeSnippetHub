@@ -12,8 +12,6 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 // 카테고리별 언어 분류
 const CATEGORY_LANGUAGES = {
@@ -58,7 +56,6 @@ const createSnippetSchema = z.object({
   language: z.string().min(1, "Please select a language"),
   category: z.string().min(1, "Please select a category"),
   code: z.string().min(1, "Code is required"),
-  tags: z.string().optional(),
 });
 
 type CreateSnippetFormValues = z.infer<typeof createSnippetSchema>;
@@ -85,7 +82,6 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
                 selectedCategory === "android" ? "kotlin" : "javascript",
       category: defaultCategory,
       code: "",
-      tags: "",
     },
   });
   
@@ -259,24 +255,7 @@ export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web
                   <FormControl>
                     <Textarea
                       placeholder="코드가 무엇을 하는지 설명해주세요"
-                      className="resize-y"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>태그 (선택사항)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="예: 알고리즘, 자료구조, 함수 (쉼표로 구분)"
+                      className="resize-y h-32"
                       {...field}
                     />
                   </FormControl>
