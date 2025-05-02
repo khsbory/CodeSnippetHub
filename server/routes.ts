@@ -33,8 +33,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
       const filter = (req.query.filter as string) || 'latest';
       const language = (req.query.language as string) || 'all';
+      const category = (req.query.category as string) || 'all';
       
-      const snippets = await storage.getSnippets(limit, filter, language);
+      const snippets = await storage.getSnippets(limit, filter, language, category);
       res.json(snippets);
     } catch (error) {
       res.status(500).json({ message: "Error fetching snippets" });
@@ -48,7 +49,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Search query is required" });
       }
       
-      const snippets = await storage.searchSnippets(query);
+      const category = (req.query.category as string) || 'all';
+      const snippets = await storage.searchSnippets(query, category);
       res.json(snippets);
     } catch (error) {
       res.status(500).json({ message: "Error searching snippets" });

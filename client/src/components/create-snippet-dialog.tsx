@@ -35,11 +35,19 @@ const LANGUAGES = [
   { value: "bash", label: "Bash" },
 ];
 
+// 카테고리 목록 정의
+const CATEGORIES = [
+  { value: "web", label: "웹 (Web)" },
+  { value: "ios", label: "iOS" },
+  { value: "android", label: "안드로이드 (Android)" },
+];
+
 // Form validation schema
 const createSnippetSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title must be at most 100 characters"),
   description: z.string().optional(),
   language: z.string().min(1, "Please select a language"),
+  category: z.string().min(1, "Please select a category"),
   code: z.string().min(1, "Code is required"),
   tags: z.string().optional(),
 });
@@ -49,9 +57,10 @@ type CreateSnippetFormValues = z.infer<typeof createSnippetSchema>;
 interface CreateSnippetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultCategory?: string;
 }
 
-export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogProps) {
+export function CreateSnippetDialog({ open, onOpenChange, defaultCategory = "web" }: CreateSnippetDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -62,6 +71,7 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
       title: "",
       description: "",
       language: "javascript",
+      category: defaultCategory,
       code: "",
       tags: "",
     },
@@ -74,6 +84,7 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
         title: values.title,
         description: values.description || "",
         language: values.language,
+        category: values.category,
         code: values.code,
         // Tags would be handled separately in a production app
       };
@@ -133,6 +144,34 @@ export function CreateSnippetDialog({ open, onOpenChange }: CreateSnippetDialogP
                   <FormControl>
                     <Input placeholder="스니펫의 제목을 입력하세요" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>카테고리</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="카테고리 선택" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent position="popper" sideOffset={8}>
+                      {CATEGORIES.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
