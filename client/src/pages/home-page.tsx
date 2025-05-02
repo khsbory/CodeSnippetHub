@@ -52,9 +52,9 @@ export default function HomePage() {
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
-  // Fetch snippets with filter and language
-  const { data: snippets, isLoading, isFetching, fetchNextPage, hasNextPage } = useQuery<SnippetWithUser[]>({
-    queryKey: ["/api/snippets", filter, language],
+  // Fetch snippets with filter and language (all categories for homepage)
+  const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
+    queryKey: ["/api/snippets", filter, language, "all"],
   });
   
   return (
@@ -141,14 +141,13 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* Load more button */}
+          {/* More snippets button - 실제로는 추가 로드 구현이 필요합니다 */}
           {!isLoading && snippets && snippets.length > 0 && (
             <div className="mt-8 text-center">
               <Button
                 variant="outline"
-                onClick={() => fetchNextPage()}
-                disabled={isFetching || !hasNextPage}
                 className="px-6 py-3"
+                disabled={isFetching}
               >
                 {isFetching ? (
                   <>
