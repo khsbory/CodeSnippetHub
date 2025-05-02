@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/header";
@@ -9,12 +9,27 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, ArrowLeft, Eye } from "lucide-react";
+import { 
+  Link, 
+  ArrowLeft, 
+  Eye, 
+  Pencil, 
+  Trash2, 
+  MoreVertical 
+} from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/lib/usePageTitle";
 import { SnippetWithUser } from "@shared/schema";
+import { EditSnippetDialog } from "@/components/edit-snippet-dialog";
+import { DeleteSnippetDialog } from "@/components/delete-snippet-dialog";
 
 export default function SnippetDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +37,10 @@ export default function SnippetDetailPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const snippetId = parseInt(id);
+  
+  // State for edit/delete dialogs
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Fetch snippet details
   const { data: snippet, isLoading, error } = useQuery<SnippetWithUser>({
@@ -151,7 +170,7 @@ export default function SnippetDetailPage() {
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-100 dark:hover:bg-blue-900">
                 {snippet.language}
               </Badge>
@@ -159,6 +178,33 @@ export default function SnippetDetailPage() {
                 <Eye className="h-4 w-4 mr-1" />
                 {snippet.views}
               </div>
+              
+              {/* 작성자 또는 관리자만 볼 수 있는 수정/삭제 버튼 */}
+              {user && (user.id === snippet.userId || user.isAdmin) && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label="스니펫 관리 메뉴">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      onClick={() => setEditDialogOpen(true)}
+                      className="cursor-pointer"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
+                      <span aria-label="스니펫 편집">편집</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => setDeleteDialogOpen(true)}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                      <span aria-label="스니펫 삭제">삭제</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
           
@@ -180,6 +226,25 @@ export default function SnippetDetailPage() {
         </div>
       </main>
       <Footer />
+      
+      {/* Edit Snippet Dialog */}
+      {snippet && (
+        <EditSnippetDialog
+          open={editDialogOpen}
+          onOpenChange={setEditDialogOpen}
+          snippet={snippet}
+        />
+      )}
+      
+      {/* Delete Snippet Dialog */}
+      {snippet && (
+        <DeleteSnippetDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          snippetId={snippet.id}
+          snippetTitle={snippet.title}
+        />
+      )}
     </div>
   );
 }
