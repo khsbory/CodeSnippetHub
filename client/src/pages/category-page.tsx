@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { SnippetCard } from "@/components/snippet-card";
@@ -16,6 +16,7 @@ import {
 import { Loader2, Search } from "lucide-react";
 import { SnippetWithUser } from "@shared/schema";
 import { CreateSnippetDialog } from "@/components/create-snippet-dialog";
+import { useAuth } from "@/hooks/use-auth";
 
 // Category-specific languages for filtering
 const CATEGORY_LANGUAGES = {
@@ -77,6 +78,8 @@ import { usePageTitle } from "@/lib/usePageTitle";
 
 export default function CategoryPage() {
   const { category } = useParams<{ category: string }>();
+  const [, navigate] = useLocation();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -179,7 +182,7 @@ export default function CategoryPage() {
   }, [loadMoreRef, hasNextPage, isFetching, fetchNextPage, searchQuery]);
   
   // Determine which data to display
-  const displaySnippets = searchQuery.trim() ? searchResults : allSnippets;
+  const displaySnippets = searchQuery.trim() ? (searchResults || []) : allSnippets;
   const isLoadingData = searchQuery.trim() ? isSearching : isLoading;
   
   return (
@@ -233,11 +236,19 @@ export default function CategoryPage() {
               </div>
               
               <div className="ml-auto self-end">
-                <Button
-                  onClick={() => setCreateDialogOpen(true)}
-                >
-                  코드 공유하기
-                </Button>
+                {user ? (
+                  <Button
+                    onClick={() => setCreateDialogOpen(true)}
+                  >
+                    코드 공유하기
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => navigate("/auth")}
+                  >
+                    로그인하고 코드 공유하기
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -278,16 +289,20 @@ export default function CategoryPage() {
                 <Button onClick={() => setSearchQuery("")}>
                   검색 초기화
                 </Button>
-              ) : (
+              ) : user ? (
                 <Button onClick={() => setCreateDialogOpen(true)}>
                   코드 공유하기
+                </Button>
+              ) : (
+                <Button onClick={() => navigate("/auth")}>
+                  로그인하고 코드 공유하기
                 </Button>
               )}
             </div>
           )}
           
           {/* 무한 스크롤 감지 영역 */}
-          {!isLoadingData && !searchQuery.trim() && displaySnippets.length > 0 && (
+          {!isLoadingData && !searchQuery.trim() && displaySnippets && displaySnippets.length > 0 && (
             <div ref={loadMoreRef} className="h-10 w-full mt-8"></div>
           )}
 

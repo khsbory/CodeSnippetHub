@@ -26,7 +26,8 @@ import {
   Menu, 
   Plus, 
   User, 
-  LogOut, 
+  LogOut,
+  LogIn,
   ShieldAlert 
 } from "lucide-react";
 
@@ -125,7 +126,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="ml-4 h-8 w-8 rounded-full">
                     <Avatar>
-                      <AvatarImage src={user.avatar} alt={user.username} />
+                      <AvatarImage src={user.avatar || undefined} alt={user.username} />
                       <AvatarFallback aria-label={`${user.username}의 프로필 이미지`}>{user.username.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </Button>
@@ -237,15 +238,26 @@ export function Header() {
                       </DrawerClose>
                     )}
                     
-                    <Button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        handleCreateSnippetClick();
-                      }}
-                      className="mt-3 w-full justify-center"
-                    >
-                      <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
-                    </Button>
+                    {user ? (
+                      <Button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleCreateSnippetClick();
+                        }}
+                        className="mt-3 w-full justify-center"
+                      >
+                        <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
+                      </Button>
+                    ) : (
+                      <DrawerClose asChild>
+                        <Button
+                          onClick={() => setLocation('/auth')}
+                          className="mt-3 w-full justify-center"
+                        >
+                          <User className="h-4 w-4 mr-1" /> 로그인하고 스니펫 생성
+                        </Button>
+                      </DrawerClose>
+                    )}
                   </nav>
                 </div>
               </DrawerContent>
