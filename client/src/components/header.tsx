@@ -112,13 +112,23 @@ export function Header() {
             <DarkModeToggle />
             
             {/* Create Snippet Button (Desktop) */}
-            <Button
-              onClick={handleCreateSnippetClick}
-              className="ml-4 hidden sm:flex items-center"
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
-            </Button>
+            {user ? (
+              <Button
+                onClick={handleCreateSnippetClick}
+                className="ml-4 hidden sm:flex items-center"
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-1" /> 스니펫 생성
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setLocation('/auth')}
+                className="ml-4 hidden sm:flex items-center"
+                size="sm"
+              >
+                <User className="h-4 w-4 mr-1" /> 로그인하고 코드 공유하기
+              </Button>
+            )}
             
             {/* User Menu (Authenticated) */}
             {user ? (
