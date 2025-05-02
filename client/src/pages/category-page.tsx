@@ -80,6 +80,11 @@ export default function CategoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [language, setLanguage] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const PAGE_SIZE = 12;
+  
+  // Ref for infinite scroll observation
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   
   // 카테고리에 따라 타이틀 동적 설정
   const categoryTitle = {
@@ -102,27 +107,38 @@ export default function CategoryPage() {
     description: `${category} 관련 코드 모음입니다.`
   };
   
-  // Fetch snippets with language for specific category
-  const { data: snippets, isLoading, isFetching } = useQuery<SnippetWithUser[]>({
+  // Fetch snippets with infinite scroll
+  const { 
+    data,
+    isLoading, 
+    isFetching,
+    fetchNextPage, 
+    hasNextPage 
+  } = useInfiniteQuery({
     queryKey: ["/api/snippets", language, category],
-    // Make sure category parameter is passed to the API
-    queryFn: async ({ queryKey }) => {
-      const [_, language, category] = queryKey;
-      const response = await fetch(`/api/snippets?language=${language}&category=${category}`);
+    queryFn: async ({ queryKey, pageParam = 1 }) => {
+      const [_, lang, cat] = queryKey as [string, string, string];
+      const response = await fetch(`/api/snippets?language=${lang}&category=${cat}&page=${pageParam}&limit=${PAGE_SIZE}`);
       if (!response.ok) {
         throw new Error('Failed to fetch snippets');
       }
-      return response.json();
+      const data = await response.json();
+      return {
+        snippets: data,
+        nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
+      };
     },
-    enabled: !searchQuery, // Don't fetch when searching
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 1,
+    enabled: !searchQuery.trim(), // Don't fetch when searching
   });
   
   // Fetch search results when search query changes, specific to this category
   const { data: searchResults, isLoading: isSearching } = useQuery<SnippetWithUser[]>({
     queryKey: ["/api/snippets/search", searchQuery, category],
     queryFn: async ({ queryKey }) => {
-      const [_, query, category] = queryKey;
-      const response = await fetch(`/api/snippets/search?q=${query}&category=${category}`);
+      const [_, query, cat] = queryKey;
+      const response = await fetch(`/api/snippets/search?q=${query}&category=${cat}`);
       if (!response.ok) {
         throw new Error('Failed to fetch search results');
       }
@@ -137,8 +153,33 @@ export default function CategoryPage() {
     // The search query will trigger the search query automatically
   };
   
+  // All snippets flattened for infinite scroll
+  const allSnippets = useMemo(() => {
+    return data?.pages?.flatMap(page => page.snippets) || [];
+  }, [data]);
+  
+  // Set up intersection observer for infinite scrolling
+  useEffect(() => {
+    if (!searchQuery.trim() && loadMoreRef.current) {
+      observerRef.current = new IntersectionObserver(entries => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasNextPage && !isFetching) {
+          fetchNextPage();
+        }
+      }, { threshold: 0.5 });
+      
+      observerRef.current.observe(loadMoreRef.current);
+    }
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loadMoreRef, hasNextPage, isFetching, fetchNextPage, searchQuery]);
+  
   // Determine which data to display
-  const displaySnippets = searchQuery.trim() ? searchResults : snippets;
+  const displaySnippets = searchQuery.trim() ? searchResults : allSnippets;
   const isLoadingData = searchQuery.trim() ? isSearching : isLoading;
   
   return (
@@ -245,7 +286,18 @@ export default function CategoryPage() {
             </div>
           )}
           
+          {/* 무한 스크롤 감지 영역 */}
+          {!isLoadingData && !searchQuery.trim() && displaySnippets.length > 0 && (
+            <div ref={loadMoreRef} className="h-10 w-full mt-8"></div>
+          )}
 
+          {/* 무한 스크롤용 로딩 인디케이터 */}
+          {isFetching && !isLoading && !searchQuery.trim() && (
+            <div className="mt-8 text-center py-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+              <p className="text-sm text-muted-foreground mt-2">스니펫 로딩 중...</p>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
